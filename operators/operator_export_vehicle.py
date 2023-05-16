@@ -177,6 +177,7 @@ def get_body_dimensions():
 def export_process(context):
     scene_filename_full = bpy.path.basename(context.blend_data.filepath)
     scene_filename = os.path.splitext(scene_filename_full)[0]
+    scene_filename = scene_filename.replace(" ", "_").replace(".", "_").replace("-", "_")
     # Make a directory called "export" in the same directory as the blend file
     export_dir = f'{bpy.path.abspath("//")}export_{scene_filename}'
     if not os.path.exists(export_dir):
