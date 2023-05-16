@@ -10,7 +10,7 @@ This Blender addon makes it a breeze to prepare vehicles for use in Unreal Engin
 
 - 2.93 LTS - Python 3.9.2
 - 3.3 LTS - Python 3.10.2
-- 3.4 - Python 3.10.8
+- 3.5 - Python 3.10.8
 
 ## License
 
