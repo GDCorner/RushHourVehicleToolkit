@@ -6,6 +6,8 @@ This Blender addon makes it a breeze to prepare vehicles for use in Unreal Engin
 
 [You can find out more about Rush Hour and documentation at the website here.](https://www.gdcorner.com/products/RushHour.html) 
 
+[Addon Documentation](https://www.gdcorner.com/documentation/rushhour/10-preparingavehicle.html)
+
 ### Blender Version - Python Version
 
 - 2.93 LTS - Python 3.9.2
