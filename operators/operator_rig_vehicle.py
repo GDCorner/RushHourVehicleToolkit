@@ -112,8 +112,6 @@ def duplicate_for_static_mesh_collection(context, parent_collection):
             new_obj.animation_data_clear()
             static_meshes_collection.objects.link(new_obj)
             new_obj.name = "SM_" + obj.name
-            # Recenter static mesh
-            new_obj.location -= body_mesh_location
 
     # Get the wheels collections
     prepped_wheels_collection = bpy.data.collections["prepped_wheels"]
@@ -222,8 +220,7 @@ def rig_vehicle(context, decimate_proxy_mesh: bool = True, decimate_amount: floa
 
     # Create a root bone at the origin
     root_bone = armature.edit_bones.new("body")
-    # body_position = body_obj.matrix_world @ body_obj.location
-    body_position = body_obj.location
+    body_position = Vector((0, 0, 0))
     root_bone.head = body_position
     root_bone.tail = body_position + Vector((0, default_bone_length, 0))
 
