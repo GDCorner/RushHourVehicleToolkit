@@ -4,15 +4,16 @@ This Blender addon makes it a breeze to prepare vehicles for use in Unreal Engin
 
 [Rush Hour is available for purchase on the Unreal Engine Marketplace here.](https://www.unrealengine.com/marketplace/en-US/product/rush-hour-vehicle-animator)
 
-[You can find out more about Rush Hour and documentation at the website here.](https://www.gdcorner.com/products/RushHour.html) 
+[You can find out more about Rush Hour and documentation at the website here.](https://www.gdcorner.com/products/RushHour.html)
 
 [Addon Documentation](https://www.gdcorner.com/documentation/rushhour/10-preparingavehicle.html)
 
-### Blender Version - Python Version
+### Blender Versions
 
-- 2.93 LTS - Python 3.9.2
-- 3.3 LTS - Python 3.10.2
-- 3.5 - Python 3.10.8
+- 2.93 LTS
+- 3.3 LTS
+- 3.5
+- 3.6 LTS
 
 ## License
 
