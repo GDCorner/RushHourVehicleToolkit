@@ -36,6 +36,7 @@ modulesNames = [
     'operators.operator_create_vehicle_collections',
     'operators.operator_rig_vehicle',
     'operators.operator_show_object_bounds',
+    'operators.operator_simple_export',
 ]
 
 
