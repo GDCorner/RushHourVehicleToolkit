@@ -26,6 +26,7 @@ modulesNames = [
     'utils.uv_helpers',
     'ui.ui_auto_uv_panel',
     'ui.ui_advanced_vehicle_prep',
+    'ui.ui_simple_vehicle_prep',
     'operators.operator_scale_UV_worldspace',
     'operators.operator_tag_auto_uv',
     'operators.operator_export_vehicle',
