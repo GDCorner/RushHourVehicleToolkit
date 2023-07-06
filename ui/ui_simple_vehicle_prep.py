@@ -24,7 +24,7 @@ class RUSHHOURVP_PT_simple_vehicle_panel(bpy.types.Panel):
         row = layout.row()
         # Create collections
         # Set scene scale
-        vehicle_col_op = row.operator("rushhourvp.create_vehicle_collections", text="Prepare Scene")
+        vehicle_col_op = row.operator("rushhourvp.prepare_scene_simple", text="Prepare Scene")
 
         layout.separator(factor=2)
         row = layout.row()
