@@ -8,6 +8,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 class RUSHHOURVP_OT_simple_prepare_scene(bpy.types.Operator):
     """Simple Prepare Scene
 This operator automatically creates the necessary collections and sets the scene scale for the Rush Hour Vehicle Toolkit addon"""
@@ -29,6 +30,7 @@ This operator automatically creates the necessary collections and sets the scene
 def register():
     print("Registering rush hour simple export operator")
     bpy.utils.register_class(RUSHHOURVP_OT_simple_prepare_scene)
+
 
 def unregister():
     print("Un-Registering rush hour simple export operator")
