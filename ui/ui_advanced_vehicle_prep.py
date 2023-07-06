@@ -5,10 +5,10 @@
 import bpy
 
 
-class RUSHHOURVP_PT_unreal_vehicle_panel(bpy.types.Panel):
+class RUSHHOURVP_PT_advanced_vehicle_panel(bpy.types.Panel):
     """Creates a Panel in the Object properties window"""
-    bl_label = "Rush Hour Unreal Engine Vehicle Prep"
-    bl_idname = "RUSHHOURVP_PT_unreal_vehicle_panel"
+    bl_label = "Rush Hour Advanced Vehicle Prep"
+    bl_idname = "RUSHHOURVP_PT_advanced_vehicle_panel"
     bl_category = "Rush Hour Unreal Vehicle"
     bl_space_type = 'VIEW_3D'
     bl_region_type = "UI"
@@ -69,12 +69,12 @@ class RUSHHOURVP_PT_unreal_vehicle_panel(bpy.types.Panel):
 
 def register():
     print("Registering UE4 Vehicle Exporter UI")
-    bpy.utils.register_class(RUSHHOURVP_PT_unreal_vehicle_panel)
+    bpy.utils.register_class(RUSHHOURVP_PT_advanced_vehicle_panel)
 
 
 def unregister():
     print("Un-Registering UE4 Vehicle Exporter UI")
-    bpy.utils.unregister_class(RUSHHOURVP_PT_unreal_vehicle_panel)
+    bpy.utils.unregister_class(RUSHHOURVP_PT_advanced_vehicle_panel)
 
 
 if __name__ == "__main__":
