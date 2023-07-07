@@ -3,8 +3,6 @@
 # https://choosealicense.com/licenses/mit/
 
 import bpy
-from mathutils import Vector
-
 from ..utils import mesh_helpers
 
 
