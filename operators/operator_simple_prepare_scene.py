@@ -11,7 +11,8 @@ log = logging.getLogger(__name__)
 
 class RUSHHOURVP_OT_simple_prepare_scene(bpy.types.Operator):
     """Simple Prepare Scene
-This operator automatically creates the necessary collections and sets the scene scale for the Rush Hour Vehicle Toolkit addon"""
+This operator automatically creates the necessary collections and sets the correct scene scale.
+NOTE: This also clears all parent relationships between objects"""
     bl_idname = "rushhourvp.prepare_scene_simple"
     bl_label = "Simple Prepare Scene for Rush Hour Vehicles"
 
@@ -24,6 +25,8 @@ This operator automatically creates the necessary collections and sets the scene
         bpy.ops.rushhourvp.create_vehicle_collections(axle_count=2)
         # Set scene scale
         bpy.ops.rushhourvp.set_scene_cm_scale()
+        # Apply transforms and clear parents
+        bpy.ops.rushhourvp.clear_parents()
         return {'FINISHED'}
 
 

@@ -38,6 +38,7 @@ modulesNames = [
     'operators.operator_show_object_bounds',
     'operators.operator_simple_export',
     'operators.operator_simple_prepare_scene',
+    'operators.operator_clear_parents',
 ]
 
 
