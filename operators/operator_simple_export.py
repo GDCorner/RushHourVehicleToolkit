@@ -27,8 +27,14 @@ This operator automatically runs the Prep, Rig and Export operators from the Rus
         bpy.ops.rushhourvp.export_ue_vehicle_fbx()
 
         # Hide rigged and prepped collections
-        bpy.data.collections["export"].hide_viewport = True
-        bpy.data.collections["prepped"].hide_viewport = True
+        #bpy.data.collections["export"].hide_viewport = True
+        #bpy.data.collections["prepped"].hide_viewport = True
+
+        view_layer = bpy.context.view_layer
+        export_layer_collection = view_layer.layer_collection.children['export']
+        export_layer_collection.hide_viewport = True
+        prepped_layer_collection = view_layer.layer_collection.children['prepped']
+        prepped_layer_collection.hide_viewport = True
         return {'FINISHED'}
 
 

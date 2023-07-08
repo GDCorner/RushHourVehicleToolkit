@@ -32,13 +32,18 @@ class RUSHHOURVP_PT_simple_vehicle_panel(bpy.types.Panel):
         # - Apply transforms
         # - Clear parents
         # - Add body collection
-        add_to_body_op = row.operator("rushhourvp.create_vehicle_collections", text="Add To Body")
+        add_to_body_op = row.operator("rushhourvp.add_selected_to_vehicle_collection", text="Add To Body")
+        add_to_body_op.collection_name = "body"
         row = layout.row()
-        add_to_fl_wheel_op = row.operator("rushhourvp.create_vehicle_collections", text="Add To FL Wheel")
-        add_to_fr_wheel_op = row.operator("rushhourvp.create_vehicle_collections", text="Add To FR Wheel")
+        add_to_fl_wheel_op = row.operator("rushhourvp.add_selected_to_vehicle_collection", text="Add To FL Wheel")
+        add_to_fl_wheel_op.collection_name = "wheel_0_L"
+        add_to_fr_wheel_op = row.operator("rushhourvp.add_selected_to_vehicle_collection", text="Add To FR Wheel")
+        add_to_fr_wheel_op.collection_name = "wheel_0_R"
         row = layout.row()
-        add_to_rl_wheel_op = row.operator("rushhourvp.create_vehicle_collections", text="Add To RL Wheel")
-        add_to_rr_wheel_op = row.operator("rushhourvp.create_vehicle_collections", text="Add To RR Wheel")
+        add_to_rl_wheel_op = row.operator("rushhourvp.add_selected_to_vehicle_collection", text="Add To RL Wheel")
+        add_to_rl_wheel_op.collection_name = "wheel_1_L"
+        add_to_rr_wheel_op = row.operator("rushhourvp.add_selected_to_vehicle_collection", text="Add To RR Wheel")
+        add_to_rr_wheel_op.collection_name = "wheel_1_R"
         row = layout.row()
 
 
