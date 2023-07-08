@@ -52,6 +52,12 @@ def set_scene_scale_to_cm(context):
         bpy.context.space_data.clip_end = bpy.context.space_data.clip_end * 100
 
 
+def move_viewport_to_car():
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.view3d.view_selected()
+    bpy.ops.object.select_all(action='DESELECT')
+
+
 class RUSHHOURVP_OT_set_scene_cm_scale(bpy.types.Operator):
     """UV Operator description"""
     bl_idname = "rushhourvp.set_scene_cm_scale"
@@ -63,6 +69,7 @@ class RUSHHOURVP_OT_set_scene_cm_scale(bpy.types.Operator):
 
     def execute(self, context):
         set_scene_scale_to_cm(context)
+        move_viewport_to_car()
         return {'FINISHED'}
 
 
