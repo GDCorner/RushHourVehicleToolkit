@@ -12,6 +12,8 @@ class RUSHHOURVP_PT_advanced_vehicle_panel(bpy.types.Panel):
     bl_category = "Rush Hour Unreal Vehicle"
     bl_space_type = 'VIEW_3D'
     bl_region_type = "UI"
+    bl_parent_id = "RUSHHOURVP_PT_rush_hour_panel"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         layout = self.layout

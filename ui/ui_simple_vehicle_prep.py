@@ -11,13 +11,11 @@ class RUSHHOURVP_PT_simple_vehicle_panel(bpy.types.Panel):
     bl_idname = "RUSHHOURVP_PT_simple_vehicle_panel"
     bl_category = "Rush Hour Unreal Vehicle"
     bl_space_type = 'VIEW_3D'
+    bl_parent_id = "RUSHHOURVP_PT_rush_hour_panel"
     bl_region_type = "UI"
 
     def draw(self, context):
         layout = self.layout
-
-        row = layout.row()
-        row.label(text="Simple mode", icon='WORLD_DATA')
 
         row = layout.row()
         row.label(text="Prep Scene", icon='WORLD_DATA')
