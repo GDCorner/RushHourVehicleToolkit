@@ -143,8 +143,14 @@ def prep_collection(context, collection, new_parent_collection):
 
     objects_to_process = []
     for obj in collection.all_objects:
+        if obj.type == "CAMERA":
+            # Don't operate on cameras
+            continue
         if obj.hide_render:
             # Don't operate on hidden objects
+            continue
+        if obj.data is None:
+            # Don't operate on objects without data
             continue
         objects_to_process.append(obj)
 
