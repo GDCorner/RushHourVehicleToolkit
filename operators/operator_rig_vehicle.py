@@ -295,7 +295,7 @@ class RUSHHOURVP_OT_rig_vehicle(bpy.types.Operator):
     )
 
     decimate_amount: bpy.props.FloatProperty(
-        name='axles_count',
+        name='decimate_amount',
         default=0.1,
         min=0.01,
         max=1.0,

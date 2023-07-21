@@ -22,7 +22,7 @@ This operator automatically runs the Prep, Rig and Export operators from the Rus
         #prep
         bpy.ops.rushhourvp.prep_vehicle_for_unreal()
         #rig
-        bpy.ops.rushhourvp.rig_vehicle()
+        bpy.ops.rushhourvp.rig_vehicle(decimate_proxy_mesh=True, decimate_amount=0.5)
         #export
         bpy.ops.rushhourvp.export_ue_vehicle_fbx()
 
