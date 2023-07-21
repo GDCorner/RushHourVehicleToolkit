@@ -160,7 +160,8 @@ def prep_objects(context, objects, new_name, new_parent_collection):
     for obj in objects:
         # duplicate obj
         new_obj = obj.copy()
-        new_obj.data = obj.data.copy()
+        if obj.data:
+            new_obj.data = obj.data.copy()
         new_obj.animation_data_clear()
         new_parent_collection.objects.link(new_obj)
         new_objs.append(new_obj)

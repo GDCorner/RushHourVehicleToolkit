@@ -144,7 +144,8 @@ def fix_negative_scales(objects):
             bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
             # Flip the normals on the mesh
-            obj.data.flip_normals()
+            if obj.data:
+                obj.data.flip_normals()
             obj.select_set(False)
 
 
