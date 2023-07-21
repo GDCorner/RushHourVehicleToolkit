@@ -334,6 +334,9 @@ def prep_vehicle_process(context):
 
 
 class RUSHHOURVP_OT_prepare_vehicle_for_unreal(bpy.types.Operator):
+    """Prepares the vehicle for unreal.
+     - Duplicates and merges meshes, material slots, etc.
+     - Takes measurements for all parts."""
     bl_idname = "rushhourvp.prep_vehicle_for_unreal"
     bl_label = "Prepare Vehicle For Unreal"
 

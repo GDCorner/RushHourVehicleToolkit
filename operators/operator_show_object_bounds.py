@@ -7,7 +7,7 @@ from ..utils import collection_helpers
 
 
 class RUSHHOURVP_OT_show_object_bounds(bpy.types.Operator):
-    """UV Operator description"""
+    """Show/Hide Object Bounds"""
     bl_idname = "rushhourvp.show_object_bounds"
     bl_label = "Show Object Bounds"
 

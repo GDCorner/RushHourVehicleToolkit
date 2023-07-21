@@ -19,7 +19,7 @@ def create_wheel_collections_for_axle(axle, parent_collection):
 
 
 class RUSHHOURVP_OT_create_vehicle_collections(bpy.types.Operator):
-    """UV Operator description"""
+    """Creates the default collections for processing vehicles with the Rush Hour toolkit"""
     bl_idname = "rushhourvp.create_vehicle_collections"
     bl_label = "Create Unreal Vehicle Collections"
 

@@ -59,7 +59,7 @@ def move_viewport_to_car():
 
 
 class RUSHHOURVP_OT_set_scene_cm_scale(bpy.types.Operator):
-    """UV Operator description"""
+    """Set Scene scale for Unreal. Rescales objects if scene was in default scale."""
     bl_idname = "rushhourvp.set_scene_cm_scale"
     bl_label = "Set the scene to centimeter scale"
 

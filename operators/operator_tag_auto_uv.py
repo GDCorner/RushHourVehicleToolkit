@@ -11,7 +11,7 @@ def enable_auto_uv_on_selected_objects(context, enable_auto_uv=True):
 
 
 class RUSHHOURVP_OT_tag_objects_for_auto_uv(bpy.types.Operator):
-    """UV Operator description"""
+    """Tag selected objects for automatic UV Unwrapping"""
     bl_idname = "rushhourvp.tag_objects_for_auto_uv"
     bl_label = "Enable auto UV unwrap for the selected objects"
 

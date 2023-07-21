@@ -23,6 +23,7 @@ def center_vehicle(context):
 
 
 class RUSHHOURVP_OT_center_vehicle(bpy.types.Operator):
+    """Centers the vehicle so it sits on the floor"""
     bl_idname = "rushhourvp.center_vehicle"
     bl_label = "Center Vehicle"
 

@@ -7,7 +7,7 @@ from ..utils import collection_helpers
 
 
 class RUSHHOURVP_OT_add_selected_to_vehicle_collection(bpy.types.Operator):
-    """UV Operator description"""
+    """Adds the selected objects to the specified body part."""
     bl_idname = "rushhourvp.add_selected_to_vehicle_collection"
     bl_label = "Add Selected Objects To Vehicle Collection"
 

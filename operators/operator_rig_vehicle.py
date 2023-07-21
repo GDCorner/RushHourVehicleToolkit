@@ -284,7 +284,7 @@ def rig_vehicle(context, decimate_proxy_mesh: bool = True, decimate_amount: floa
 
 
 class RUSHHOURVP_OT_rig_vehicle(bpy.types.Operator):
-    """UV Operator description"""
+    """Rigs prepped vehicle for export to Unreal"""
     bl_idname = "rushhourvp.rig_vehicle"
     bl_label = "Rig Vehicle for Unreal"
 

@@ -84,7 +84,7 @@ def apply_worldspace_uv_to_objects(context, apply_modifiers=True, apply_scale=Tr
 
 
 class RUSHHOURVP_OT_automatic_uv_unwrap_worldspace(bpy.types.Operator):
-    """UV Operator description"""
+    """Scales UVs to worldspace"""
     bl_idname = "rushhourvp.auto_uv_worldspace"
     bl_label = "Scale UV To Worldspace operator"
 

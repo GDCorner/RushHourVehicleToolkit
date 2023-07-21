@@ -21,6 +21,7 @@ def clear_parents(context):
     bpy.ops.object.select_all(action='DESELECT')
 
 class RUSHHOURVP_OT_clear_parents(bpy.types.Operator):
+    """Clears object parents while preserving transform"""
     bl_idname = "rushhourvp.clear_parents"
     bl_label = "Clear Parents while keeping transform"
 

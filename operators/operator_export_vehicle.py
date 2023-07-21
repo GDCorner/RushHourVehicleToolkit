@@ -203,7 +203,7 @@ def export_process(context):
 
 
 class RUSHHOURVP_OT_export_vehicle(bpy.types.Operator):
-    """UV Operator description"""
+    """Export all appropriate model files and json for Rush Hour Vehicle Importer"""
     bl_idname = "rushhourvp.export_ue_vehicle_fbx"
     bl_label = "Export UE Vehicle"
 
