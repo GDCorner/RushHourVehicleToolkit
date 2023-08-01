@@ -7,7 +7,7 @@ import bpy
 
 class RUSHHOURVP_PT_simple_vehicle_panel(bpy.types.Panel):
     """Creates a Panel in the Object properties window"""
-    bl_label = "Rush Hour Simple Vehicle Prep"
+    bl_label = "Simple Vehicle Prep"
     bl_idname = "RUSHHOURVP_PT_simple_vehicle_panel"
     bl_category = "Rush Hour Unreal Vehicle"
     bl_space_type = 'VIEW_3D'
