@@ -164,6 +164,9 @@ def prep_objects(context, objects, new_name, new_parent_collection):
 
     # for each object in collection
     for obj in objects:
+        if obj.type != "MESH":
+            # Skip non-mesh objects
+            continue
         # duplicate obj
         new_obj = obj.copy()
         if obj.data:
