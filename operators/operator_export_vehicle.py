@@ -35,7 +35,7 @@ def export_vehicle_static_meshes(context, scene_filename, export_dir):
 
             # Export collection as static mesh
             bpy.ops.export_scene.fbx(filepath=mesh_filename, check_existing=False, mesh_smooth_type='FACE',
-                                     use_active_collection=False, use_selection=True)
+                                     use_active_collection=False, use_selection=True, path_mode='COPY', embed_textures=True)
 
             exports.append(mesh_filename)
 
@@ -66,7 +66,7 @@ def export_vehicle_skeletal_meshes(context, scene_filename, export_dir):
     skel_body_mesh_filename = os.path.join(export_dir, f'{skel_body_mesh.name}-{scene_filename}.fbx')
 
     bpy.ops.export_scene.fbx(filepath=skel_body_mesh_filename, check_existing=False, mesh_smooth_type='FACE',
-                             use_selection=True, add_leaf_bones=False)
+                             use_selection=True, add_leaf_bones=False, path_mode='COPY', embed_textures=True)
 
     skel_body_mesh.select_set(False)
 
@@ -77,7 +77,7 @@ def export_vehicle_skeletal_meshes(context, scene_filename, export_dir):
 
     skel_proxy_mesh_filename = os.path.join(export_dir, f'{skel_proxy_mesh.name}-{scene_filename}.fbx')
     bpy.ops.export_scene.fbx(filepath=skel_proxy_mesh_filename, check_existing=False, mesh_smooth_type='FACE',
-                             use_selection=True, add_leaf_bones=False)
+                             use_selection=True, add_leaf_bones=False, path_mode='COPY', embed_textures=True)
 
     exports = [skel_body_mesh_filename, skel_proxy_mesh_filename]
     return exports
