@@ -175,6 +175,13 @@ def get_body_dimensions():
 
 
 def export_process(context):
+    # Export doesn't work unless export layer is visible
+    view_layer = bpy.context.view_layer
+    export_layer_collection = view_layer.layer_collection.children['export']
+    # Store original visibility for after export
+    original_layer_visibility = export_layer_collection.hide_viewport
+    export_layer_collection.hide_viewport = False
+
     scene_filename_full = bpy.path.basename(context.blend_data.filepath)
     scene_filename = os.path.splitext(scene_filename_full)[0]
     scene_filename = scene_filename.replace(" ", "_").replace(".", "_").replace("-", "_")
@@ -198,6 +205,9 @@ def export_process(context):
     exported_sk_basenames = [os.path.basename(x) for x in exported_skeletal_meshes]
 
     write_export_json(exported_sm_basenames, exported_sk_basenames, scene_filename, export_dir)
+
+    # Return layer to it's original visibility
+    export_layer_collection.hide_viewport = original_layer_visibility
 
     print("Vehicle Export Complete")
 
