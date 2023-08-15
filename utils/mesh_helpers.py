@@ -218,6 +218,27 @@ def center_meshes_on_floor(context, meshes):
     for mesh in meshes:
         mesh.location += negative_location
 
+
+def delete_vertices_with_no_faces(mesh):
+    bpy.ops.object.select_all(action='DESELECT')
+    mesh.select_set(True)
+    bpy.context.view_layer.objects.active = mesh
+
+    bpy.ops.object.mode_set(mode='EDIT')
+
+    # Select all vertices with no faces
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.mesh.select_loose()
+    bpy.ops.mesh.delete(type='VERT')
+
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+
+def delete_vertices_with_no_faces_from_meshes(meshes):
+    for mesh in meshes:
+        delete_vertices_with_no_faces(mesh)
+
+
 def register():
     pass
 

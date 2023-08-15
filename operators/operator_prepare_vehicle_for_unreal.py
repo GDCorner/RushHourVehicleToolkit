@@ -158,6 +158,8 @@ def prep_collection(context, collection, new_parent_collection):
 def prep_objects(context, objects, new_name, new_parent_collection):
     new_objs = []
 
+    bpy.ops.object.select_all(action='DESELECT')
+
     # for each object in collection
     for obj in objects:
         if obj.type != "MESH":
@@ -176,6 +178,8 @@ def prep_objects(context, objects, new_name, new_parent_collection):
     bpy.ops.object.select_all(action='DESELECT')
 
     mesh_helpers.fix_negative_scales(new_objs)
+
+    mesh_helpers.delete_vertices_with_no_faces_from_meshes(new_objs)
 
     mesh_helpers.remove_blank_materials(new_objs)
 
