@@ -35,7 +35,8 @@ def export_vehicle_static_meshes(context, scene_filename, export_dir):
 
             # Export collection as static mesh
             bpy.ops.export_scene.fbx(filepath=mesh_filename, check_existing=False, mesh_smooth_type='FACE',
-                                     use_active_collection=False, use_selection=True, path_mode='COPY', embed_textures=True)
+                                     use_active_collection=False, use_selection=True, path_mode='COPY',
+                                     embed_textures=True)
 
             exports.append(mesh_filename)
 
@@ -219,12 +220,6 @@ def export_process(context):
     export_dir = f'{bpy.path.abspath("//")}export_{scene_filename}'
     if not os.path.exists(export_dir):
         os.makedirs(export_dir)
-
-    # delete all files in export_dir
-    for file in os.listdir(export_dir):
-        pass
-        # Deleting has been disabled until further testing. It's high risk, low reward
-        # os.remove(os.path.join(export_dir, file))
 
     exported_static_meshes = export_vehicle_static_meshes(context, scene_filename, export_dir)
 
