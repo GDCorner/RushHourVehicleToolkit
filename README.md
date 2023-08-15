@@ -10,9 +10,9 @@ This Blender addon makes it a breeze to prepare vehicles for use in Unreal Engin
 
 ### Blender Versions
 
-- 2.93 LTS
+This addon is only tested against the active LTS versions of Blender. Other versions may work, but are unsupported. 
+
 - 3.3 LTS
-- 3.5
 - 3.6 LTS
 
 ## License
