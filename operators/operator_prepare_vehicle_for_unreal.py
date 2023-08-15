@@ -4,17 +4,13 @@
 
 import bpy
 
-from ..utils import mesh_helpers, collection_helpers
-
-from mathutils import Vector
-
+from ..utils import collection_helpers
 from ..utils import mesh_helpers
 
-import logging
 
 # Create proxy mesh with single tiny triangle at 0,0,0.
 # This allows usage of a skeletal mesh in unreal, while having all the geometry be static meshes
-def create_proxy_mesh(context, parent_bone_name):
+def create_proxy_mesh():
     mesh = bpy.data.meshes.new("proxy")
     mesh.from_pydata([(0.0001, 0, 0), (0, 0.0001, 0), (0, 0, 0)], [], [(0, 1, 2)])
     mesh.update()
@@ -54,7 +50,7 @@ def merge_objects(context, objects, new_name):
                 mesh_helpers.apply_split_normals(obj)
                 obj.select_set(False)
     else:
-        # If older then blender 3.4, use the old method
+        # If older than blender 3.4, use the old method
         for obj in objects:
             print("obj: ", obj.name, obj.type)
             if obj.type == "MESH":
@@ -87,8 +83,8 @@ def merge_objects(context, objects, new_name):
     for obj in new_objects:
         obj.name = new_name
 
-    for object in new_objects:
-        deduplicate_material_slots(context, object)
+    for obj in new_objects:
+        deduplicate_material_slots(obj)
 
     return new_objects
 
@@ -106,13 +102,13 @@ def recenter_object_origin(target_object):
     target_object.select_set(False)
 
 
-def deduplicate_material_slots(context, target_object):
+def deduplicate_material_slots(target_object):
     # deselect all objects
     bpy.ops.object.select_all(action='DESELECT')
     # select object
     target_object.select_set(True)
     # for each material slot in object, find duplicates and remove them, assigning all faces to the first slot
-    # This used to not be enumerate as Blender offers slot_index in MaterialSlot struct in later versions.
+    # This used to not be enumerated as Blender offers slot_index in MaterialSlot struct in later versions.
     # For now enumerate is used to support older versions
     for slot1idx, slot in enumerate(target_object.material_slots):
         for slot2idx, slot2 in enumerate(target_object.material_slots):
@@ -272,7 +268,6 @@ def prep_wheel(context, wheel_collection, new_parent_collection):
         obj["rim_radius"] = rim_radius
 
 
-
 def prep_vehicle_process(context):
     # Deselect everything
     bpy.ops.object.select_all(action='DESELECT')
@@ -296,7 +291,7 @@ def prep_vehicle_process(context):
     bpy.ops.object.delete()
 
     # Create proxy mesh for the empty skeleton rig
-    proxy_mesh_obj = create_proxy_mesh(context, "body")
+    proxy_mesh_obj = create_proxy_mesh()
     proxy_mesh_obj.select_set(True)
     context.view_layer.objects.active = proxy_mesh_obj
 
