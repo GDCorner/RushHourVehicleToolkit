@@ -54,7 +54,7 @@ class RUSHHOURVP_PT_simple_vehicle_panel(bpy.types.Panel):
         # Prep
         # Rig
         # Export
-        row.operator("rushhourvp.export_vehicle_simple", text="Export Prepped Vehicle")
+        row.operator("rushhourvp.export_vehicle_simple", text="Export Vehicle - Simple")
 
 
 def register():
