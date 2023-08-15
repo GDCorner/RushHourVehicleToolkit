@@ -48,8 +48,8 @@ def set_scene_scale_to_cm(context):
             obj.location = (obj.location[0] * 100, obj.location[1] * 100, obj.location[2] * 100)
 
         # Set the clip end difference to 100 times the current value
-        bpy.context.space_data.clip_start = bpy.context.space_data.clip_start * 100
-        bpy.context.space_data.clip_end = bpy.context.space_data.clip_end * 100
+        bpy.context.space_data.clip_start = 1.0
+        bpy.context.space_data.clip_end = 10000.0
 
 
 def move_viewport_to_car():
