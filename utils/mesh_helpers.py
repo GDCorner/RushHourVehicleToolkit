@@ -94,6 +94,15 @@ def get_surface_area_of_faces_from_mesh(curr_object, face_list, apply_scaling=Fa
     return face_total_world_area
 
 
+def apply_all_transforms(context, meshes):
+    # Apply all transforms to selected object
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in meshes:
+        obj.select_set(True)
+        context.view_layer.objects.active = obj
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        obj.select_set(False)
+
 def apply_all_modifiers(context):
     # apply all modifiers to selected object
     # bpy.ops.object.convert(target='MESH')

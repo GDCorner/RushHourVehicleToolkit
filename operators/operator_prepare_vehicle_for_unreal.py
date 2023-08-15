@@ -181,6 +181,8 @@ def prep_objects(context, objects, new_name, new_parent_collection):
 
     mesh_helpers.delete_vertices_with_no_faces_from_meshes(new_objs)
 
+    mesh_helpers.apply_all_transforms(context, new_objs)
+
     mesh_helpers.remove_blank_materials(new_objs)
 
     # Deselect everything
