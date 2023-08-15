@@ -54,6 +54,7 @@ def register():
     print("Registering rush hour simple export operator")
     bpy.utils.register_class(RUSHHOURVP_OT_simple_export_vehicle)
 
+
 def unregister():
     print("Un-Registering rush hour simple export operator")
     bpy.utils.unregister_class(RUSHHOURVP_OT_simple_export_vehicle)
