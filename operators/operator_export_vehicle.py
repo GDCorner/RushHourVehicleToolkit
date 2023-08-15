@@ -174,13 +174,43 @@ def get_body_dimensions():
     return dimensions
 
 
-def export_process(context):
-    # Export doesn't work unless export layer is visible
+def force_sub_layer_collection_visible(collection, parent_layer_collection, original_visibilities):
+    layer_collection = parent_layer_collection.children[collection.name]
+    # Store original visibility for after export
+    original_visibilities[layer_collection] = layer_collection.hide_viewport
+    layer_collection.hide_viewport = False
+
+    # Recurse through other sub collections
+    for sub_collection in collection.children:
+        force_sub_layer_collection_visible(sub_collection, layer_collection, original_visibilities)
+
+    # Set all objects to visible
+    for obj in collection.objects:
+        # Store original visibility for after export
+        original_visibilities[obj] = obj.hide_get()
+        obj.hide_set(False)
+
+
+def force_export_collection_visible():
+    original_visibilities = {}
+
     view_layer = bpy.context.view_layer
     export_layer_collection = view_layer.layer_collection.children['export']
     # Store original visibility for after export
-    original_layer_visibility = export_layer_collection.hide_viewport
+    original_visibilities[export_layer_collection] = export_layer_collection.hide_viewport
     export_layer_collection.hide_viewport = False
+
+    export_collection = bpy.data.collections["export"]
+    # Get the static_meshes collection from export_collection
+    for collection in export_collection.children:
+        force_sub_layer_collection_visible(collection, export_layer_collection, original_visibilities)
+
+    return original_visibilities
+
+
+def export_process(context):
+    # Force all objects in the export collection to be visible or export will be blank meshes
+    original_visibilities = force_export_collection_visible()
 
     scene_filename_full = bpy.path.basename(context.blend_data.filepath)
     scene_filename = os.path.splitext(scene_filename_full)[0]
@@ -206,8 +236,14 @@ def export_process(context):
 
     write_export_json(exported_sm_basenames, exported_sk_basenames, scene_filename, export_dir)
 
-    # Return layer to it's original visibility
-    export_layer_collection.hide_viewport = original_layer_visibility
+    # Restore visibility states after export
+    for item in original_visibilities:
+        visibility = original_visibilities[item]
+        # check if item is a layer_collection or an object
+        if isinstance(item, bpy.types.LayerCollection):
+            item.hide_viewport = visibility
+        else:
+            item.hide_set(visibility)
 
     print("Vehicle Export Complete")
 
