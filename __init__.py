@@ -26,6 +26,7 @@ modulesNames = [
     'utils.uv_helpers',
     'ui.ui_auto_uv_panel',
     'ui.ui_rush_hour_panel',
+    'ui.ui_prep_warnings_panel',
     'ui.ui_simple_vehicle_prep_panel',
     'ui.ui_advanced_vehicle_prep_panel',
     'operators.operator_scale_UV_worldspace',
@@ -41,6 +42,11 @@ modulesNames = [
     'operators.operator_simple_prepare_scene',
     'operators.operator_clear_parents',
     'operators.operator_add_to_vehicle_sub_collection',
+    'ui.warning_details.ui_warn_exceed_nanite_materials_panel',
+    'ui.warning_details.ui_warn_wrong_facing_panel',
+    'ui.warning_details.ui_warn_negative_scales_panel',
+    'ui.warning_details.ui_warn_unexpected_length_panel',
+    'ui.warning_details.ui_warn_wheel_sizes_panel',
 ]
 
 
