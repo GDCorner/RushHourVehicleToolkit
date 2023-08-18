@@ -103,3 +103,28 @@ def are_wheel_sizes_round():
                 wheels_round = False
 
     return wheels_round
+
+
+def are_all_meshes_under_nanite_material_limit():
+    """Checks all meshes have less than the maximum number of supported nanite materials"""
+    MAX_NANITE_MATERIALS = 64
+
+    # Get "prepped" collection
+    prepped_collection = bpy.data.collections.get("prepped")
+
+    if prepped_collection is None:
+        # The vehicle is not prepped yet, so return False
+        return False
+
+    all_within_limits = True
+
+    for obj in prepped_collection.all_objects:
+        # if it's a mesh object
+        if obj.type == 'MESH':
+            # Get the number of materials
+            num_materials = len(obj.material_slots)
+            if num_materials > MAX_NANITE_MATERIALS:
+                all_within_limits = False
+                log.warning(f"Mesh {obj.name} has {num_materials} materials. This exceeds the maximum number of supported nanite materials ({MAX_NANITE_MATERIALS})")
+
+    return all_within_limits

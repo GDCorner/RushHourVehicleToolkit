@@ -7,6 +7,9 @@ import bpy
 from ...utils.ui_helpers import label_multiline
 
 
+from ...utils.vehicle_checks import are_all_meshes_under_nanite_material_limit, is_vehicle_prepped
+
+
 class RUSHHOURVP_PT_warn_exceed_nanite_material_panel(bpy.types.Panel):
     """Creates a Panel to warn about exceeding nanite materials"""
     bl_label = "Max Number of Nanite Materials"
@@ -21,8 +24,10 @@ class RUSHHOURVP_PT_warn_exceed_nanite_material_panel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return True
-
+        if is_vehicle_prepped() is False:
+            return False
+        under_material_limit = are_all_meshes_under_nanite_material_limit()
+        return not under_material_limit
     def draw_header(self, context):
         layout = self.layout
         layout.label(text="", icon='ERROR')
