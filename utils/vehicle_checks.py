@@ -15,7 +15,6 @@ import logging
 log = logging.getLogger(__name__)
 
 
-
 def is_vehicle_prepped():
     # Get "prepped" collection
     prepped_collection = bpy.data.collections.get("prepped")
@@ -126,5 +125,27 @@ def are_all_meshes_under_nanite_material_limit():
             if num_materials > MAX_NANITE_MATERIALS:
                 all_within_limits = False
                 log.warning(f"Mesh {obj.name} has {num_materials} materials. This exceeds the maximum number of supported nanite materials ({MAX_NANITE_MATERIALS})")
+
+    return all_within_limits
+
+def has_negative_scales():
+    """Checks all meshes have postive scales"""
+
+    # Get "prepped" collection
+    vehicle_collection = bpy.data.collections.get("vehicle")
+
+    if vehicle_collection is None:
+        # The vehicle is not prepped yet, so return False
+        return False
+
+    all_within_limits = True
+
+    for obj in vehicle_collection.all_objects:
+        # if it's a mesh object
+        if obj.type == 'MESH':
+            # Get the number of materials
+            if obj.scale.x < 0 or obj.scale.y < 0 or obj.scale.z < 0:
+                all_within_limits = False
+                log.warning(f"Mesh {obj.name} has negative scale.")
 
     return all_within_limits
