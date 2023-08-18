@@ -34,7 +34,7 @@ class RUSHHOURVP_PT_warn_exceed_nanite_material_panel(bpy.types.Panel):
         row = layout.row()
         row.label(text="Max Number of Nanite Materials", icon='ERROR')
         row = layout.row()
-        description_text = "Nanite can only support 64 material slots. This is typically solved by sorting your geometry into the 'body' and 'body_interior' collections appropriately. Make use of all the additional collections available."
+        description_text = "Nanite can only support a maximum of 64 material slots per mesh. This is typically solved by sorting your geometry into the 'body' and 'body_interior' collections appropriately. Make use of all the additional collections available."
         label_multiline(
             context=context,
             text=description_text,

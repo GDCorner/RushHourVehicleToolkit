@@ -32,9 +32,9 @@ class RUSHHOURVP_PT_warn_negative_scales_panel(bpy.types.Panel):
         # get the width of the layout in pixels
 
         row = layout.row()
-        row.label(text="Vehicle Facing Wrong Direction", icon='ERROR')
+        row.label(text="Meshes have negative scales", icon='ERROR')
         row = layout.row()
-        description_text = "The vehicle appears to be facing the wrong direction. Make sure it's facing the positive X axis with the positive Y axis pointing to the left."
+        description_text = "Some meshes have a negative scale. The toolkit tries to compensate but it can lead to errors. Negative scales lead to inverted normals which appears as missing geometry or 'inside-out' meshes in Unreal. The best thing to do is apply all transforms on the meshes with negative scales, and check the 'face orientation' overlay to visualise any inverted normals."
         label_multiline(
             context=context,
             text=description_text,
@@ -44,7 +44,7 @@ class RUSHHOURVP_PT_warn_negative_scales_panel(bpy.types.Panel):
         row = layout.row()
         row = layout.row()
 
-        warning_text = "This is only a warning, you can proceed anyway. The test checks the dot product of the wheels on axle 0. In some circumstances this may produce an inaccurate warning"
+        warning_text = "This is only a warning, you can proceed anyway but be aware of visual artifacts in Unreal."
         label_multiline(
             context=context,
             text=warning_text,
