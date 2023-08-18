@@ -6,6 +6,8 @@ import bpy
 
 from ...utils.ui_helpers import label_multiline
 
+from ...utils.vehicle_checks import has_safe_length, is_vehicle_prepped
+
 
 class RUSHHOURVP_PT_warn_unexpected_vehicle_length_panel(bpy.types.Panel):
     """Creates a Panel to warn about wrong_facing of vehicle"""
@@ -21,7 +23,10 @@ class RUSHHOURVP_PT_warn_unexpected_vehicle_length_panel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return True
+        if is_vehicle_prepped() is False:
+            return False
+        safe_length, length = has_safe_length()
+        return not safe_length
 
     def draw_header(self, context):
         layout = self.layout
@@ -34,7 +39,9 @@ class RUSHHOURVP_PT_warn_unexpected_vehicle_length_panel(bpy.types.Panel):
         row = layout.row()
         row.label(text="Unexpected Vehicle Length", icon='ERROR')
         row = layout.row()
-        description_text = "The vehicle is currently 100m long. Typically vehicles are within 1m to 20m in length depending on type. Make sure the vehicle is the correct size."
+        safe_length, length = has_safe_length()
+        length_text = f'{(length / 100):.2f}'
+        description_text = f'The vehicle is currently {length_text}m long. Typically vehicles are within 2m to 20m in length depending on type. Make sure the vehicle is the correct size.'
         label_multiline(
             context=context,
             text=description_text,

@@ -128,6 +128,7 @@ def are_all_meshes_under_nanite_material_limit():
 
     return all_within_limits
 
+
 def has_negative_scales():
     """Checks all meshes have postive scales"""
 
@@ -149,3 +150,36 @@ def has_negative_scales():
                 log.warning(f"Mesh {obj.name} has negative scale.")
 
     return all_within_limits
+
+
+def has_safe_length():
+    """Checks vehicle is within safe length tolerance"""
+    # Get "prepped" collection
+    prepped_collection = bpy.data.collections.get("prepped")
+
+    if prepped_collection is None:
+        # The vehicle is not prepped yet, so return False
+        return False
+
+    meshes = []
+    for obj in prepped_collection.all_objects:
+        if obj.type == 'MESH':
+            meshes.append(obj)
+
+    # Get the bounds of all meshes
+    bounds = mesh_helpers.get_bounds_of_meshes(meshes)
+    x_size = mesh_helpers.get_x_size_of_bounds(bounds)
+
+    within_limits = True
+
+    if x_size > 20.0 * 100.0:
+        within_limits = False
+        log.warning(f"Vehicle is {x_size}m long.")
+
+    if x_size < 2 * 100.0:
+        within_limits = False
+        log.warning(f"Vehicle is {x_size}m long.")
+
+    return within_limits, x_size
+
+
