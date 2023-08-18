@@ -39,7 +39,7 @@ class RUSHHOURVP_PT_warn_wheel_sizes_panel(bpy.types.Panel):
         row = layout.row()
         row.label(text="Odd Wheel Sizes", icon='ERROR')
         row = layout.row()
-        description_text = "The wheels appear to have non-uniform sizes. Check all wheels are properly round, that all wheels are similar size and wheels don't have any camber\slant. Press 'Show Bounds' for help visualising the wheel sizes."
+        description_text = "The wheels appear to have non-uniform sizes. Check all wheels are properly round, that all wheels are similar size and wheels don't have any camber\slant. Press 'Show Bounds' for help visualising the wheel sizes. This could also be because the vehicle is facing the wrong direction."
         label_multiline(
             context=context,
             text=description_text,
