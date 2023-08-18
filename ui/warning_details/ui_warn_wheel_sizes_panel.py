@@ -6,6 +6,8 @@ import bpy
 
 from ...utils.ui_helpers import label_multiline
 
+from ...utils.vehicle_checks import are_wheel_sizes_round, is_vehicle_prepped
+
 
 class RUSHHOURVP_PT_warn_wheel_sizes_panel(bpy.types.Panel):
     """Creates a Panel to warn about wrong_facing of vehicle"""
@@ -21,7 +23,10 @@ class RUSHHOURVP_PT_warn_wheel_sizes_panel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return True
+        if is_vehicle_prepped() is False:
+            return False
+        wheels_round = are_wheel_sizes_round()
+        return not wheels_round
 
     def draw_header(self, context):
         layout = self.layout
