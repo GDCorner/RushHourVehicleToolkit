@@ -103,12 +103,13 @@ def apply_all_transforms(context, meshes):
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
         obj.select_set(False)
 
-def apply_all_modifiers(context):
-    # apply all modifiers to selected object
-    # bpy.ops.object.convert(target='MESH')
-    # TODO: check if this is needed for blender 3.0+
+def apply_all_modifiers(context, meshes):
+    # Deselect all objects
+    bpy.ops.object.select_all(action='DESELECT')
+
     # bpy.ops.object.apply_all_modifiers()
-    for ob in context.selected_objects:
+    for ob in meshes:
+        ob.select_set(True)
         context.view_layer.objects.active = ob
         for mod in ob.modifiers:
             try:
@@ -117,6 +118,7 @@ def apply_all_modifiers(context):
                 # Modifier is likely disabled, remove it
                 logging.log(logging.ERROR, f'Unable to apply modifier. Likely disable, deleting it instead. OBJ: {ob.name}, MOD: {mod.name}')
                 bpy.ops.object.modifier_remove(modifier=mod.name)
+        ob.select_set(False)
 
 
 # https://github.com/Aadjou/blender-scripts/blob/master/utils_split_normals.py

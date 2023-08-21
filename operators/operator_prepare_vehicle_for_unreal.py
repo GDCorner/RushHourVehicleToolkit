@@ -38,7 +38,7 @@ def merge_objects(context, objects, new_name):
             bpy.context.view_layer.objects.active = obj
             if obj.type == "MESH":
                 obj.select_set(True)
-                mesh_helpers.apply_all_modifiers(context)
+                mesh_helpers.apply_all_modifiers(context, [obj])
                 if not obj.data.has_bevel_weight_vertex:
                     bpy.ops.mesh.customdata_bevel_weight_vertex_add()
                 if not obj.data.has_bevel_weight_edge:
@@ -55,7 +55,7 @@ def merge_objects(context, objects, new_name):
             print("obj: ", obj.name, obj.type)
             if obj.type == "MESH":
                 obj.select_set(True)
-                mesh_helpers.apply_all_modifiers(context)
+                mesh_helpers.apply_all_modifiers(context, [obj])
                 obj.data.use_customdata_vertex_bevel = True
                 obj.data.use_customdata_edge_bevel = True
                 obj.data.use_customdata_edge_crease = True
@@ -228,7 +228,7 @@ def prep_wheel(context, wheel_collection, new_parent_collection):
         # deselect all
         bpy.ops.object.select_all(action='DESELECT')
         obj.select_set(True)
-        mesh_helpers.apply_all_modifiers(context)
+        mesh_helpers.apply_all_modifiers(context, [obj])
         obj.select_set(False)
         recenter_object_origin(obj)
 
@@ -251,7 +251,7 @@ def prep_wheel(context, wheel_collection, new_parent_collection):
         # deselect all
         bpy.ops.object.select_all(action='DESELECT')
         obj.select_set(True)
-        mesh_helpers.apply_all_modifiers(context)
+        mesh_helpers.apply_all_modifiers(context, [obj])
         obj.select_set(False)
         tire_objects.append(obj)
         recenter_object_origin(obj)

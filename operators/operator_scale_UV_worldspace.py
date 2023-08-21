@@ -17,7 +17,7 @@ def apply_worldspace_uvs(context, curr_object: bpy.types.Object, apply_modifiers
 
     if apply_modifiers:
         # apply all modifiers to selected object
-        mesh_helpers.apply_all_modifiers(context)
+        mesh_helpers.apply_all_modifiers(context, [curr_object])
     if apply_scale:
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
