@@ -74,6 +74,9 @@ def merge_objects(context, objects, new_name):
 
     # get the currently selected meshes
     new_objects = bpy.context.selected_objects
+    for new_obj in new_objects:
+        # Disable auto worldspace uv
+        new_obj.enable_auto_uv = False
 
     bpy.ops.object.select_all(action='DESELECT')
     for curr_object in new_objects:
@@ -94,8 +97,6 @@ def recenter_object_origin(target_object):
     bpy.ops.object.select_all(action='DESELECT')
     target_object.select_set(True)
     bpy.context.view_layer.objects.active = target_object
-    # Apply transform for new object
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
     # Set the origin to the geometry
     bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')
@@ -231,6 +232,8 @@ def prep_wheel(context, wheel_collection, new_parent_collection):
         obj.select_set(False)
         recenter_object_origin(obj)
 
+    rim_objects = prep_objects(context, rim_objects, rim_collection.name + "_rim", new_parent_collection)
+
     caliper_objects = []
     for obj in caliper_collection.all_objects:
         if obj.hide_render:
@@ -238,7 +241,9 @@ def prep_wheel(context, wheel_collection, new_parent_collection):
             continue
         caliper_objects.append(obj)
 
-    wheel_objects = []
+    caliper_objects = prep_objects(context, caliper_objects, caliper_collection.name, new_parent_collection)
+
+    tire_objects = []
     for obj in wheel_collection.all_objects:
         if obj.hide_render:
             # Don't operate on hidden objects
@@ -248,10 +253,20 @@ def prep_wheel(context, wheel_collection, new_parent_collection):
         obj.select_set(True)
         mesh_helpers.apply_all_modifiers(context)
         obj.select_set(False)
-        wheel_objects.append(obj)
+        tire_objects.append(obj)
         recenter_object_origin(obj)
 
-    wheel_size = mesh_helpers.get_bounds_of_meshes(wheel_objects)
+    # Remove the other bespoke objects from the wheel objects
+    for caliper_obj in caliper_collection.all_objects:
+        if caliper_obj in tire_objects:
+            tire_objects.remove(caliper_obj)
+    for rim_obj in rim_collection.all_objects:
+        if rim_obj in tire_objects:
+            tire_objects.remove(rim_obj)
+
+    tire_objects = prep_objects(context, tire_objects, wheel_collection.name + "_tyre", new_parent_collection)
+
+    wheel_size = mesh_helpers.get_bounds_of_meshes(tire_objects)
     wheel_radius = mesh_helpers.get_x_size_of_bounds(wheel_size) / 2
     wheel_width = mesh_helpers.get_y_size_of_bounds(wheel_size)
     rim_radius = wheel_radius
@@ -260,12 +275,18 @@ def prep_wheel(context, wheel_collection, new_parent_collection):
         rim_size = mesh_helpers.get_bounds_of_meshes(rim_objects)
         rim_radius = mesh_helpers.get_x_size_of_bounds(rim_size) / 2
 
-    # Remove the brake caliper objects from the wheel objects
-    for caliper_obj in caliper_objects:
-        wheel_objects.remove(caliper_obj)
+    wheel_objects = prep_objects(context, tire_objects + rim_objects, wheel_collection.name, new_parent_collection)
 
-    wheel_objects = prep_objects(context, wheel_objects, wheel_collection.name, new_parent_collection)
-    prep_objects(context, caliper_objects, caliper_collection.name, new_parent_collection)
+    # Deselect all
+    bpy.ops.object.select_all(action='DESELECT')
+
+    # delete tire objects
+    for obj in tire_objects:
+        obj.select_set(True)
+    # delete rim objects
+    for obj in rim_objects:
+        obj.select_set(True)
+    bpy.ops.object.delete()
 
     # Add wheel radius as custom property to new merged wheel
     for obj in wheel_objects:
