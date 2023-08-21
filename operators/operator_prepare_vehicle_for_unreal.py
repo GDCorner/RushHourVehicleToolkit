@@ -178,6 +178,8 @@ def prep_objects(context, objects, new_name, new_parent_collection):
     # Deselect everything
     bpy.ops.object.select_all(action='DESELECT')
 
+    mesh_helpers.apply_all_modifiers(context, new_objs)
+
     mesh_helpers.fix_negative_scales(new_objs)
 
     mesh_helpers.delete_vertices_with_no_faces_from_meshes(new_objs)
