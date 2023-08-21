@@ -4,6 +4,8 @@
 
 import bpy
 
+from ..utils.vehicle_checks import is_passing_all_checks
+
 
 class RUSHHOURVP_PT_prep_warnings_panel(bpy.types.Panel):
     """Creates a Panel to display warnings about the vehicle preparation"""
@@ -17,8 +19,9 @@ class RUSHHOURVP_PT_prep_warnings_panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        row = layout.row()
-        row.label(text="None at this time", icon='WORLD_DATA')
+        if is_passing_all_checks():
+            row = layout.row()
+            row.label(text="None at this time", icon='WORLD_DATA')
 
 
 def register():

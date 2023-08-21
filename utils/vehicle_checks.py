@@ -15,6 +15,24 @@ import logging
 log = logging.getLogger(__name__)
 
 
+def is_passing_all_checks():
+    vehicle_collection = bpy.data.collections.get("vehicle")
+    if vehicle_collection is None:
+        # The vehicle is not prepped yet, so return True
+        return True
+
+    unprepped_checks_passed = has_no_negative_scales()
+    prepped_checks_passed = True
+
+    if is_vehicle_prepped():
+        prepped_checks_passed = is_vehicle_facing_correct_direction() and are_wheel_sizes_round() and \
+                                    are_all_meshes_under_nanite_material_limit() and has_safe_length()
+    else:
+        prepped_checks_passed = True
+
+    return unprepped_checks_passed and prepped_checks_passed
+
+
 def is_vehicle_prepped():
     # Get "prepped" collection
     prepped_collection = bpy.data.collections.get("prepped")
@@ -129,7 +147,7 @@ def are_all_meshes_under_nanite_material_limit():
     return all_within_limits
 
 
-def has_negative_scales():
+def has_no_negative_scales():
     """Checks all meshes have postive scales"""
 
     # Get "prepped" collection
@@ -137,7 +155,7 @@ def has_negative_scales():
 
     if vehicle_collection is None:
         # The vehicle is not prepped yet, so return False
-        return False
+        return True
 
     all_within_limits = True
 

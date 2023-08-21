@@ -6,7 +6,7 @@ import bpy
 
 from ...utils.ui_helpers import label_multiline
 
-from ...utils.vehicle_checks import has_negative_scales, is_vehicle_prepped
+from ...utils.vehicle_checks import has_no_negative_scales, is_vehicle_prepped
 
 
 class RUSHHOURVP_PT_warn_negative_scales_panel(bpy.types.Panel):
@@ -23,7 +23,7 @@ class RUSHHOURVP_PT_warn_negative_scales_panel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        negative_scales = has_negative_scales()
+        negative_scales = has_no_negative_scales()
         return not negative_scales
 
     def draw_header(self, context):
