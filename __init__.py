@@ -13,9 +13,9 @@ bl_info = {
     "description": "Provides utilities and functions to easily create, setup and export vehicles for Unreal Engine 5 and Rush Hour",
     "author": "Philip Edwards (GDCorner) <philip@gdcorner.com>",
     "version": (1, 4, 0),
-    "blender": (2, 90, 0),
+    "blender": (3, 3, 0),
     "category": "Vehicles",
-    "doc_url": "https://www.gdcorner.com",
+    "doc_url": "https://www.gdcorner.com/products/RushHour.html",
 }
 
 modulesNames = [
