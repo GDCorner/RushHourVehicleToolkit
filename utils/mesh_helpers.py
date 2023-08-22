@@ -10,6 +10,8 @@ import logging
 from mathutils import Vector
 from . import message_helpers
 
+log = logging.getLogger(__name__)
+
 
 # Copies a bmesh from an object
 # Copied under GPL from:
@@ -103,20 +105,23 @@ def apply_all_transforms(context, meshes):
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
         obj.select_set(False)
 
-def apply_all_modifiers(context):
-    # apply all modifiers to selected object
-    # bpy.ops.object.convert(target='MESH')
-    # TODO: check if this is needed for blender 3.0+
+
+def apply_all_modifiers(context, meshes):
+    # Deselect all objects
+    bpy.ops.object.select_all(action='DESELECT')
+
     # bpy.ops.object.apply_all_modifiers()
-    for ob in context.selected_objects:
+    for ob in meshes:
+        ob.select_set(True)
         context.view_layer.objects.active = ob
         for mod in ob.modifiers:
             try:
                 bpy.ops.object.modifier_apply(modifier=mod.name)
             except:
                 # Modifier is likely disabled, remove it
-                logging.log(logging.ERROR, f'Unable to apply modifier. Likely disable, deleting it instead. OBJ: {ob.name}, MOD: {mod.name}')
+                log.error(logging.ERROR, f'Unable to apply modifier. Likely disable, deleting it instead. OBJ: {ob.name}, MOD: {mod.name}')
                 bpy.ops.object.modifier_remove(modifier=mod.name)
+        ob.select_set(False)
 
 
 # https://github.com/Aadjou/blender-scripts/blob/master/utils_split_normals.py
@@ -145,9 +150,8 @@ def fix_negative_scales(objects):
         if obj.scale.x < 0 or obj.scale.y < 0 or obj.scale.z < 0:
             obj.select_set(True)
             # Show warning dialog to user
-            message_helpers.show_warning_message(
-                message="Negative scale detected on object: " + obj.name + ". Negative scales can produce unexpected results. Recommend removing or fixing the negative scale before prep process",
-                title="Negative Scale Detected")
+            log.warning("Negative scale detected on object: " + obj.name + ". Negative scales can produce unexpected results. Recommend removing or fixing the negative scale before prep process")
+
 
             # Apply the scale operator
             bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
@@ -167,6 +171,7 @@ def remove_blank_materials(objects):
                 message_helpers.show_warning_message(
                     message="Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal",
                     title="Blank Material Slot Detected")
+                log.warning("Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal")
                 obj.active_material_index = obj.material_slots.find(slot.name)
                 bpy.ops.object.material_slot_remove({'object': obj})
 
@@ -211,6 +216,7 @@ def get_center_of_meshes(meshes):
     bb_center = ((min_vert[0] + max_vert[0]) / 2, (min_vert[1] + max_vert[1]) / 2, (min_vert[2] + max_vert[2]) / 2)
     return bb_center
 
+
 def center_meshes_on_floor(context, meshes):
     """Centers the meshes on the floor. Assumes the floor is at Z=0"""
     bounds = get_bounds_of_meshes(meshes)
@@ -246,6 +252,13 @@ def delete_vertices_with_no_faces(mesh):
 def delete_vertices_with_no_faces_from_meshes(meshes):
     for mesh in meshes:
         delete_vertices_with_no_faces(mesh)
+
+
+def clear_parents_keep_transforms_on_meshes(meshes):
+    bpy.ops.object.select_all(action='DESELECT')
+    for mesh in meshes:
+        mesh.select_set(True)
+    bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
 
 
 def register():

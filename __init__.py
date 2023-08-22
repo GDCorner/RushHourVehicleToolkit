@@ -12,10 +12,10 @@ bl_info = {
     "name": "Rush Hour Unreal Vehicle Toolkit",
     "description": "Provides utilities and functions to easily create, setup and export vehicles for Unreal Engine 5 and Rush Hour",
     "author": "Philip Edwards (GDCorner) <philip@gdcorner.com>",
-    "version": (1, 3, 2),
-    "blender": (2, 90, 0),
+    "version": (1, 4, 0),
+    "blender": (3, 3, 0),
     "category": "Vehicles",
-    "doc_url": "https://www.gdcorner.com",
+    "doc_url": "https://www.gdcorner.com/products/RushHour.html",
 }
 
 modulesNames = [
@@ -24,10 +24,13 @@ modulesNames = [
     'utils.message_helpers',
     'utils.collection_helpers',
     'utils.uv_helpers',
+    'utils.vehicle_checks',
     'ui.ui_auto_uv_panel',
     'ui.ui_rush_hour_panel',
-    'ui.ui_simple_vehicle_prep',
-    'ui.ui_advanced_vehicle_prep',
+    'ui.ui_prep_warnings_panel',
+    'ui.ui_simple_vehicle_prep_panel',
+    'ui.ui_advanced_vehicle_prep_panel',
+    'operators.operator_check_vehicle',
     'operators.operator_scale_UV_worldspace',
     'operators.operator_tag_auto_uv',
     'operators.operator_export_vehicle',
@@ -41,6 +44,12 @@ modulesNames = [
     'operators.operator_simple_prepare_scene',
     'operators.operator_clear_parents',
     'operators.operator_add_to_vehicle_sub_collection',
+    'ui.warning_details.ui_warn_file_not_saved_panel',
+    'ui.warning_details.ui_warn_exceed_nanite_materials_panel',
+    'ui.warning_details.ui_warn_wrong_facing_panel',
+    'ui.warning_details.ui_warn_negative_scales_panel',
+    'ui.warning_details.ui_warn_unexpected_length_panel',
+    'ui.warning_details.ui_warn_wheel_sizes_panel',
 ]
 
 

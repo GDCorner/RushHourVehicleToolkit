@@ -3,7 +3,6 @@
 # https://choosealicense.com/licenses/mit/
 
 import bpy
-from ..utils import collection_helpers
 
 
 class RUSHHOURVP_OT_show_object_bounds(bpy.types.Operator):

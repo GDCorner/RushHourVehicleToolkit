@@ -3,7 +3,6 @@
 # https://choosealicense.com/licenses/mit/
 
 import bpy
-from ..utils import collection_helpers
 
 
 class RUSHHOURVP_OT_add_selected_to_vehicle_collection(bpy.types.Operator):

@@ -47,6 +47,8 @@ This operator automatically runs the Prep, Rig and Export operators from the Rus
         export_layer_collection.hide_viewport = True
         prepped_layer_collection = view_layer.layer_collection.children['prepped']
         prepped_layer_collection.hide_viewport = True
+
+        bpy.ops.rushhourvp.check_vehicle()
         return {'FINISHED'}
 
 
