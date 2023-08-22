@@ -175,6 +175,8 @@ def prep_objects(context, objects, new_name, new_parent_collection):
         new_objs.append(new_obj)
         new_obj.name = new_name + "_" + obj.name
 
+    mesh_helpers.clear_parents_keep_transforms_on_meshes(new_objs)
+
     # Deselect everything
     bpy.ops.object.select_all(action='DESELECT')
 

@@ -103,6 +103,7 @@ def apply_all_transforms(context, meshes):
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
         obj.select_set(False)
 
+
 def apply_all_modifiers(context, meshes):
     # Deselect all objects
     bpy.ops.object.select_all(action='DESELECT')
@@ -213,6 +214,7 @@ def get_center_of_meshes(meshes):
     bb_center = ((min_vert[0] + max_vert[0]) / 2, (min_vert[1] + max_vert[1]) / 2, (min_vert[2] + max_vert[2]) / 2)
     return bb_center
 
+
 def center_meshes_on_floor(context, meshes):
     """Centers the meshes on the floor. Assumes the floor is at Z=0"""
     bounds = get_bounds_of_meshes(meshes)
@@ -248,6 +250,13 @@ def delete_vertices_with_no_faces(mesh):
 def delete_vertices_with_no_faces_from_meshes(meshes):
     for mesh in meshes:
         delete_vertices_with_no_faces(mesh)
+
+
+def clear_parents_keep_transforms_on_meshes(meshes):
+    bpy.ops.object.select_all(action='DESELECT')
+    for mesh in meshes:
+        mesh.select_set(True)
+    bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
 
 
 def register():
