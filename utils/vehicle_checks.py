@@ -227,7 +227,7 @@ def is_passing_all_checks():
 
 
     # print all the checks
-    should_print_check_results = True
+    should_print_check_results = False
     if should_print_check_results:
         log.warning("======================")
         log.warning("The current vehicle check status:")
