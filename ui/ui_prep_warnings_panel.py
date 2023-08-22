@@ -4,8 +4,6 @@
 
 import bpy
 
-from ..utils.vehicle_checks import is_passing_all_checks
-
 
 class RUSHHOURVP_PT_prep_warnings_panel(bpy.types.Panel):
     """Creates a Panel to display warnings about the vehicle preparation"""

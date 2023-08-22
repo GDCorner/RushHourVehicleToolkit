@@ -6,8 +6,6 @@ import bpy
 
 from ...utils.ui_helpers import label_multiline
 
-from ...utils.vehicle_checks import is_vehicle_facing_correct_direction, is_vehicle_prepped
-
 
 class RUSHHOURVP_PT_warn_wrong_facing_panel(bpy.types.Panel):
     """Creates a Panel to warn about wrong_facing of vehicle"""

@@ -4,12 +4,9 @@
 
 import math
 import bpy
-import bmesh
 import mathutils
 from bpy.app.handlers import persistent
 
-
-from . import math_helpers
 from . import mesh_helpers
 
 import logging
@@ -227,7 +224,7 @@ def is_passing_all_checks():
 
 
     # print all the checks
-    if True:
+    if False:
         log.warning("======================")
         log.warning("The current vehicle check status:")
         log.warning("has_no_negative_scales: " + str(bpy.context.scene.vehicle_checks.has_no_negative_scales))
