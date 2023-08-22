@@ -44,6 +44,7 @@ modulesNames = [
     'operators.operator_simple_prepare_scene',
     'operators.operator_clear_parents',
     'operators.operator_add_to_vehicle_sub_collection',
+    'ui.warning_details.ui_warn_file_not_saved_panel',
     'ui.warning_details.ui_warn_exceed_nanite_materials_panel',
     'ui.warning_details.ui_warn_wrong_facing_panel',
     'ui.warning_details.ui_warn_negative_scales_panel',

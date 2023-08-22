@@ -17,7 +17,7 @@ class RUSHHOURVP_PT_prep_warnings_panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        if context.scene.vehicle_checks.is_passing_all_checks:
+        if context.scene.vehicle_checks.is_passing_all_checks and len(bpy.data.filepath) > 0:
             row = layout.row()
             row.label(text="None at this time", icon='WORLD_DATA')
 
