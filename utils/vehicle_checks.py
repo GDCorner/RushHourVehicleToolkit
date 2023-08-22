@@ -18,6 +18,8 @@ def update_all_checks():
     vehicle_collection = bpy.data.collections.get("vehicle")
     if vehicle_collection is None:
         # The vehicle is not prepped yet, so return True
+        bpy.context.scene.vehicle_checks.has_no_negative_scales = True
+        is_passing_all_checks()
         return
 
     bpy.context.scene.vehicle_checks.has_no_negative_scales = has_no_negative_scales()
@@ -208,6 +210,7 @@ def is_passing_all_checks():
     vehicle_collection = bpy.data.collections.get("vehicle")
     if vehicle_collection is None:
         # The vehicle is not prepped yet, so return True
+        bpy.context.scene.vehicle_checks.is_passing_all_checks = True
         return True
 
     unprepped_checks_passed = bpy.context.scene.vehicle_checks.has_no_negative_scales
@@ -224,7 +227,8 @@ def is_passing_all_checks():
 
 
     # print all the checks
-    if False:
+    should_print_check_results = True
+    if should_print_check_results:
         log.warning("======================")
         log.warning("The current vehicle check status:")
         log.warning("has_no_negative_scales: " + str(bpy.context.scene.vehicle_checks.has_no_negative_scales))
