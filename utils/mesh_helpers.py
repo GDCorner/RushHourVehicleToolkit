@@ -10,6 +10,8 @@ import logging
 from mathutils import Vector
 from . import message_helpers
 
+log = logging.getLogger(__name__)
+
 
 # Copies a bmesh from an object
 # Copied under GPL from:
@@ -117,7 +119,7 @@ def apply_all_modifiers(context, meshes):
                 bpy.ops.object.modifier_apply(modifier=mod.name)
             except:
                 # Modifier is likely disabled, remove it
-                logging.log(logging.ERROR, f'Unable to apply modifier. Likely disable, deleting it instead. OBJ: {ob.name}, MOD: {mod.name}')
+                log.error(logging.ERROR, f'Unable to apply modifier. Likely disable, deleting it instead. OBJ: {ob.name}, MOD: {mod.name}')
                 bpy.ops.object.modifier_remove(modifier=mod.name)
         ob.select_set(False)
 
@@ -148,9 +150,8 @@ def fix_negative_scales(objects):
         if obj.scale.x < 0 or obj.scale.y < 0 or obj.scale.z < 0:
             obj.select_set(True)
             # Show warning dialog to user
-            message_helpers.show_warning_message(
-                message="Negative scale detected on object: " + obj.name + ". Negative scales can produce unexpected results. Recommend removing or fixing the negative scale before prep process",
-                title="Negative Scale Detected")
+            log.warning("Negative scale detected on object: " + obj.name + ". Negative scales can produce unexpected results. Recommend removing or fixing the negative scale before prep process")
+
 
             # Apply the scale operator
             bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
@@ -170,6 +171,7 @@ def remove_blank_materials(objects):
                 message_helpers.show_warning_message(
                     message="Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal",
                     title="Blank Material Slot Detected")
+                log.warning("Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal")
                 obj.active_material_index = obj.material_slots.find(slot.name)
                 bpy.ops.object.material_slot_remove({'object': obj})
 
