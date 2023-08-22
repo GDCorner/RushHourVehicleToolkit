@@ -6,6 +6,8 @@ import math
 import bpy
 import bmesh
 import mathutils
+from bpy.app.handlers import persistent
+
 
 from . import math_helpers
 from . import mesh_helpers
@@ -257,13 +259,20 @@ class VehicleCheckResults(bpy.types.PropertyGroup):
     vehicle_length: bpy.props.FloatProperty(name="Vehicle Length")
 
 
+@persistent
+def load_file_handler(dummy):
+    update_all_checks()
+
+
 def register():
     print("Registering Vehicle Check Results")
     bpy.utils.register_class(VehicleCheckResults)
     bpy.types.Scene.vehicle_checks = bpy.props.PointerProperty(type=VehicleCheckResults)
+    bpy.app.handlers.load_post.append(load_file_handler)
 
 
 def unregister():
     print("Un-Registering Vehicle Check Results")
     bpy.utils.unregister_class(VehicleCheckResults)
     del bpy.types.Scene.vehicle_checks
+    bpy.app.handlers.load_post.remove(load_file_handler)
