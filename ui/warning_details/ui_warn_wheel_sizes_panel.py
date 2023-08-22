@@ -23,9 +23,9 @@ class RUSHHOURVP_PT_warn_wheel_sizes_panel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        if is_vehicle_prepped() is False:
+        if context.scene.vehicle_checks.is_vehicle_prepped is False:
             return False
-        wheels_round = are_wheel_sizes_round()
+        wheels_round = context.scene.vehicle_checks.are_wheels_round
         return not wheels_round
 
     def draw_header(self, context):

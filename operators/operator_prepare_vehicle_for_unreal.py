@@ -369,6 +369,7 @@ class RUSHHOURVP_OT_prepare_vehicle_for_unreal(bpy.types.Operator):
 
     def execute(self, context):
         prep_vehicle_process(context)
+        bpy.ops.rushhourvp.check_vehicle()
         return {'FINISHED'}
 
 

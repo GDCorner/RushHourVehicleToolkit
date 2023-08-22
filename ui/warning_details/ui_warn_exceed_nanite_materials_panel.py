@@ -24,9 +24,9 @@ class RUSHHOURVP_PT_warn_exceed_nanite_material_panel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        if is_vehicle_prepped() is False:
+        if context.scene.vehicle_checks.is_vehicle_prepped is False:
             return False
-        under_material_limit = are_all_meshes_under_nanite_material_limit()
+        under_material_limit = context.scene.vehicle_checks.are_all_meshes_under_nanite_material_limit
         return not under_material_limit
     def draw_header(self, context):
         layout = self.layout

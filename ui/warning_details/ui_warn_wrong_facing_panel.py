@@ -23,9 +23,9 @@ class RUSHHOURVP_PT_warn_wrong_facing_panel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        if is_vehicle_prepped() is False:
+        if context.scene.vehicle_checks.is_vehicle_prepped is False:
             return False
-        vehicle_facing = is_vehicle_facing_correct_direction()
+        vehicle_facing = context.scene.vehicle_checks.is_vehicle_facing_correct_direction
         return not vehicle_facing
 
     def draw_header(self, context):

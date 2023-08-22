@@ -15,22 +15,26 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def is_passing_all_checks():
+def update_all_checks():
     vehicle_collection = bpy.data.collections.get("vehicle")
     if vehicle_collection is None:
         # The vehicle is not prepped yet, so return True
-        return True
+        return
 
-    unprepped_checks_passed = has_no_negative_scales()
-    prepped_checks_passed = True
+    bpy.context.scene.vehicle_checks.has_no_negative_scales = has_no_negative_scales()
 
-    if is_vehicle_prepped():
-        prepped_checks_passed = is_vehicle_facing_correct_direction() and are_wheel_sizes_round() and \
-                                    are_all_meshes_under_nanite_material_limit() and has_safe_length()
-    else:
-        prepped_checks_passed = True
+    bpy.context.scene.vehicle_checks.is_vehicle_prepped = is_vehicle_prepped()
 
-    return unprepped_checks_passed and prepped_checks_passed
+    if bpy.context.scene.vehicle_checks.is_vehicle_prepped:
+        bpy.context.scene.vehicle_checks.is_vehicle_facing_correct_direction = is_vehicle_facing_correct_direction()
+        bpy.context.scene.vehicle_checks.are_wheels_round = are_wheel_sizes_round()
+        bpy.context.scene.vehicle_checks.are_all_meshes_under_nanite_material_limit = are_all_meshes_under_nanite_material_limit()
+
+        is_safe, length = has_safe_length()
+        bpy.context.scene.vehicle_checks.has_safe_length = is_safe
+        bpy.context.scene.vehicle_checks.vehicle_length = length
+
+    is_passing_all_checks()
 
 
 def is_vehicle_prepped():
@@ -201,3 +205,65 @@ def has_safe_length():
     return within_limits, x_size
 
 
+def is_passing_all_checks():
+    vehicle_collection = bpy.data.collections.get("vehicle")
+    if vehicle_collection is None:
+        # The vehicle is not prepped yet, so return True
+        return True
+
+    unprepped_checks_passed = bpy.context.scene.vehicle_checks.has_no_negative_scales
+    prepped_checks_passed = True
+
+    if bpy.context.scene.vehicle_checks.is_vehicle_prepped:
+        prepped_checks_passed = bpy.context.scene.vehicle_checks.is_vehicle_facing_correct_direction and bpy.context.scene.vehicle_checks.are_wheels_round and \
+                                    bpy.context.scene.vehicle_checks.are_all_meshes_under_nanite_material_limit and bpy.context.scene.vehicle_checks.has_safe_length
+    else:
+        prepped_checks_passed = True
+
+    bpy.context.scene.vehicle_checks.is_passing_all_checks = unprepped_checks_passed and prepped_checks_passed
+    log.warning("is_passing_all_checks: " + str(bpy.context.scene.vehicle_checks.is_passing_all_checks))
+
+
+    # print all the checks
+    if True:
+        log.warning("======================")
+        log.warning("The current vehicle check status:")
+        log.warning("has_no_negative_scales: " + str(bpy.context.scene.vehicle_checks.has_no_negative_scales))
+        log.warning("is_vehicle_prepped: " + str(bpy.context.scene.vehicle_checks.is_vehicle_prepped))
+        log.warning("is_vehicle_facing_correct_direction: " + str(bpy.context.scene.vehicle_checks.is_vehicle_facing_correct_direction))
+        log.warning("are_wheels_round: " + str(bpy.context.scene.vehicle_checks.are_wheels_round))
+        log.warning("are_all_meshes_under_nanite_material_limit: " + str(bpy.context.scene.vehicle_checks.are_all_meshes_under_nanite_material_limit))
+        log.warning("has_safe_length: " + str(bpy.context.scene.vehicle_checks.has_safe_length))
+        log.warning("is_passing_all_checks: " + str(bpy.context.scene.vehicle_checks.is_passing_all_checks))
+
+
+
+    return bpy.context.scene.vehicle_checks.is_passing_all_checks
+
+
+class VehicleCheckResults(bpy.types.PropertyGroup):
+    is_passing_all_checks: bpy.props.BoolProperty(name="Vehicle Is Passing All Checks")
+    is_vehicle_prepped: bpy.props.BoolProperty(name="Vehicle Is Prepped")
+    is_vehicle_facing_correct_direction: bpy.props.BoolProperty(name="Vehicle Is Facing Correct Direction")
+    are_wheels_round: bpy.props.BoolProperty(name="Wheels Are Not Round")
+    wheels_not_round: bpy.props.StringProperty(name="Wheels Not Round")
+    are_all_meshes_under_nanite_material_limit: bpy.props.BoolProperty(name="All Meshes Under Nanite Material Limit")
+    meshes_over_nanite_material_limit: bpy.props.StringProperty(name="Meshes Over Nanite Material Limit")
+
+    has_no_negative_scales: bpy.props.BoolProperty(name="No Negative Scales")
+    meshes_with_negative_scales: bpy.props.StringProperty(name="Meshes With Negative Scales")
+
+    has_safe_length: bpy.props.BoolProperty(name="Vehicle Is Within Safe Length")
+    vehicle_length: bpy.props.FloatProperty(name="Vehicle Length")
+
+
+def register():
+    print("Registering Vehicle Check Results")
+    bpy.utils.register_class(VehicleCheckResults)
+    bpy.types.Scene.vehicle_checks = bpy.props.PointerProperty(type=VehicleCheckResults)
+
+
+def unregister():
+    print("Un-Registering Vehicle Check Results")
+    bpy.utils.unregister_class(VehicleCheckResults)
+    del bpy.types.Scene.vehicle_checks

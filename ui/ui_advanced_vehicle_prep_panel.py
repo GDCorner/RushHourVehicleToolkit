@@ -33,6 +33,8 @@ class RUSHHOURVP_PT_advanced_vehicle_panel(bpy.types.Panel):
         row = layout.row()
         row.operator("rushhourvp.set_scene_cm_scale", text="Setup Scene Scale")
         row = layout.row()
+        row.operator("rushhourvp.check_vehicle", text="Run Checks")
+        row = layout.row()
         row.operator("rushhourvp.clear_parents", text="Clear Parent Relationships")
         row = layout.row()
         show_bounds_true = row.operator("rushhourvp.show_object_bounds", text="Show Bounds")

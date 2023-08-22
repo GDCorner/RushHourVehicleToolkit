@@ -23,8 +23,8 @@ class RUSHHOURVP_PT_warn_negative_scales_panel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        negative_scales = has_no_negative_scales()
-        return not negative_scales
+        no_negative_scales = context.scene.vehicle_checks.has_no_negative_scales
+        return not no_negative_scales
 
     def draw_header(self, context):
         layout = self.layout
