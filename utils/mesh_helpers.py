@@ -239,7 +239,11 @@ def delete_vertices_with_no_faces(mesh):
     mesh.select_set(True)
     bpy.context.view_layer.objects.active = mesh
 
+    # Switch to edit mode
     bpy.ops.object.mode_set(mode='EDIT')
+
+    # Switch to vertex select mode
+    bpy.ops.mesh.select_mode(type="VERT")
 
     # Select all vertices with no faces
     bpy.ops.mesh.select_all(action='DESELECT')
