@@ -28,9 +28,56 @@ def export_static_usd_selected(filepath: str):
     bpy.ops.wm.usd_export(filepath=filepath, check_existing=False, selected_objects_only=True, overwrite_textures=True,
                           export_textures=True)
 
+
 def export_skeletal_usd_selected(filepath: str):
     bpy.ops.wm.usd_export(filepath=filepath, check_existing=False, selected_objects_only=True, overwrite_textures=True,
                           export_textures=True)
+
+
+def export_all_meshes_as_usd(context, scene_filename: str, export_dir: str):
+    # Deselect everything
+    bpy.ops.object.select_all(action='DESELECT')
+
+    mesh_filename = os.path.join(export_dir, f'{scene_filename}.usd')
+
+    # Get the export collection
+    export_collection = bpy.data.collections["export"]
+    # Get the static_meshes collection from export_collection
+    static_meshes_collection = export_collection.children["static_meshes"]
+
+    # Select all static meshes
+    for mesh in static_meshes_collection.objects:
+        if mesh.type == 'MESH':
+            # Set the active object
+            context.view_layer.objects.active = mesh
+            # Select the mesh
+            mesh.select_set(True)
+
+    # Get the static_meshes collection from export_collection
+    skeletal_meshes_collection = export_collection.children["skeleton"]
+
+    # Get the object "SK_phys_mesh" from skeletal_meshes_collection
+    skel_body_mesh = skeletal_meshes_collection.objects["SK_phys_mesh"]
+    skel_body_mesh.select_set(True)
+    context.view_layer.objects.active = skel_body_mesh
+
+    # Select the armature
+    armature = skeletal_meshes_collection.objects["Armature"]
+    armature.select_set(True)
+
+    # Get the object "SK_proxy" from skeletal_meshes_collection
+    skel_proxy_mesh = skeletal_meshes_collection.objects["SK_proxy"]
+    skel_proxy_mesh.select_set(True)
+    context.view_layer.objects.active = skel_proxy_mesh
+
+    export_static_usd_selected(filepath=mesh_filename)
+
+    # Deselect everything
+    bpy.ops.object.select_all(action='DESELECT')
+
+    exports = []
+
+    return exports
 
 
 def export_vehicle_static_meshes(context, scene_filename, export_dir):
@@ -151,8 +198,12 @@ def get_wheel_collection_json(static_meshes, scene_filename):
 
 
 def write_export_json(static_meshes, skeletal_meshes, scene_filename, export_dir):
-    skel_body_filename = [x for x in skeletal_meshes if "SK_phys_mesh" in x][0]
-    skel_proxy_filename = [x for x in skeletal_meshes if "SK_proxy" in x][0]
+    try:
+        skel_body_filename = [x for x in skeletal_meshes if "SK_phys_mesh" in x][0]
+        skel_proxy_filename = [x for x in skeletal_meshes if "SK_proxy" in x][0]
+    except:
+        skel_body_filename = ""
+        skel_proxy_filename = ""
 
     export_json = {
         "manifest_version": 1.0,
@@ -237,11 +288,15 @@ def export_process(context):
     if not os.path.exists(export_dir):
         os.makedirs(export_dir)
 
-    exported_static_meshes = export_vehicle_static_meshes(context, scene_filename, export_dir)
+    exported_static_meshes = []
+    #exported_static_meshes = export_vehicle_static_meshes(context, scene_filename, export_dir)
 
     exported_sm_basenames = [os.path.basename(x) for x in exported_static_meshes]
 
-    exported_skeletal_meshes = export_vehicle_skeletal_meshes(context, scene_filename, export_dir)
+    exported_skeletal_meshes = []
+    #exported_skeletal_meshes = export_vehicle_skeletal_meshes(context, scene_filename, export_dir)
+
+    export_all_meshes_as_usd(context, scene_filename, export_dir)
 
     exported_sk_basenames = [os.path.basename(x) for x in exported_skeletal_meshes]
 
