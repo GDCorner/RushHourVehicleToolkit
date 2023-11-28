@@ -24,6 +24,31 @@ def create_proxy_mesh():
 
     return mesh_obj
 
+def ensure_custom_weights_exist(obj):
+    if bpy.app.version >= (4, 0, 0):
+        if "bevel_weight_vert" not in obj.data.attributes:
+            obj.data.attributes.new(name="bevel_weight_vert", type='FLOAT', domain='POINT')
+        if "bevel_weight_edge" not in obj.data.attributes:
+            obj.data.attributes.new(name="bevel_weight_edge", type='FLOAT', domain='EDGE')
+        if "crease_vertex" not in obj.data.attributes:
+            obj.data.attributes.new(name="crease_vertex", type='FLOAT', domain='POINT')
+        if "crease_edge" not in obj.data.attributes:
+            obj.data.attributes.new(name="crease_edge", type='FLOAT', domain='EDGE')
+    elif bpy.app.version >= (3, 4, 0):
+        # if blender 3.4 or newer, use the new operator
+        if not obj.data.has_bevel_weight_vertex:
+            bpy.ops.mesh.customdata_bevel_weight_vertex_add()
+        if not obj.data.has_bevel_weight_edge:
+            bpy.ops.mesh.customdata_bevel_weight_edge_add()
+        if not obj.data.has_crease_vertex:
+            bpy.ops.mesh.customdata_crease_vertex_add()
+        if not obj.data.has_crease_edge:
+            bpy.ops.mesh.customdata_crease_edge_add()
+    else:
+        # Older versions
+        obj.data.use_customdata_vertex_bevel = True
+        obj.data.use_customdata_edge_bevel = True
+        obj.data.use_customdata_edge_crease = True
 
 def merge_objects(context, objects, new_name):
     # Deselect any objects that might still be selected
@@ -31,36 +56,14 @@ def merge_objects(context, objects, new_name):
 
     # Apply split normals to resolve any issue with auto-smoothing differences between meshes
     # Split the normals to ensure that surfaces aren't messed up during the merge process
-    if bpy.app.version >= (3, 4, 0):
-        # if blender 3.4 or newer, use the new operator
-        for obj in objects:
-            print("obj: ", obj.name, obj.type)
-            bpy.context.view_layer.objects.active = obj
-            if obj.type == "MESH":
-                obj.select_set(True)
-                mesh_helpers.apply_all_modifiers(context, [obj])
-                if not obj.data.has_bevel_weight_vertex:
-                    bpy.ops.mesh.customdata_bevel_weight_vertex_add()
-                if not obj.data.has_bevel_weight_edge:
-                    bpy.ops.mesh.customdata_bevel_weight_edge_add()
-                if not obj.data.has_crease_vertex:
-                    bpy.ops.mesh.customdata_crease_vertex_add()
-                if not obj.data.has_crease_edge:
-                    bpy.ops.mesh.customdata_crease_edge_add()
-                mesh_helpers.apply_split_normals(obj)
-                obj.select_set(False)
-    else:
-        # If older than blender 3.4, use the old method
-        for obj in objects:
-            print("obj: ", obj.name, obj.type)
-            if obj.type == "MESH":
-                obj.select_set(True)
-                mesh_helpers.apply_all_modifiers(context, [obj])
-                obj.data.use_customdata_vertex_bevel = True
-                obj.data.use_customdata_edge_bevel = True
-                obj.data.use_customdata_edge_crease = True
-                mesh_helpers.apply_split_normals(obj)
-                obj.select_set(False)
+    for obj in objects:
+        print("obj: ", obj.name, obj.type)
+        if obj.type == "MESH":
+            obj.select_set(True)
+            mesh_helpers.apply_all_modifiers(context, [obj])
+            ensure_custom_weights_exist(obj)
+            mesh_helpers.apply_split_normals(obj)
+            obj.select_set(False)
 
     # Select all meshes in preparation for join operation
     for obj in objects:
