@@ -65,7 +65,7 @@ def duplicate_meshes_for_skeletal_mesh(context, skel_collection, decimate_proxy_
     skel_body_mesh.data = body_mesh.data.copy()
     skel_body_mesh.animation_data_clear()
     skel_collection.objects.link(skel_body_mesh)
-    skel_body_mesh.name = "SK_phys_mesh"
+    rename_object_and_data(skel_body_mesh, "SK_phys_mesh")
     if decimate_proxy_mesh:
         decimate_mesh(context, skel_body_mesh, decimate_amount)
 
@@ -77,7 +77,7 @@ def duplicate_meshes_for_skeletal_mesh(context, skel_collection, decimate_proxy_
         skel_wheel_mesh.data = obj.data.copy()
         skel_wheel_mesh.animation_data_clear()
         skel_collection.objects.link(skel_wheel_mesh)
-        skel_wheel_mesh.name = "SK_" + obj.name
+        rename_object_and_data(skel_wheel_mesh, "SK_" + obj.name)
         if decimate_proxy_mesh:
             decimate_mesh(context, skel_wheel_mesh, decimate_amount)
 
@@ -87,8 +87,22 @@ def duplicate_meshes_for_skeletal_mesh(context, skel_collection, decimate_proxy_
     skel_proxy_mesh.data = proxy_mesh.data.copy()
     skel_proxy_mesh.animation_data_clear()
     skel_collection.objects.link(skel_proxy_mesh)
-    skel_proxy_mesh.name = "SK_" + proxy_mesh.name
+    rename_object_and_data(skel_proxy_mesh, "SK_" + proxy_mesh.name)
 
+
+def rename_object_and_data(obj, new_name):
+    obj.name = new_name
+
+    # get existing data block with name "new_name"
+    if new_name in bpy.data.meshes:
+        existing_data = bpy.data.meshes[new_name]
+        print("Found existing data block with name " + new_name + ", renaming to " + new_name + "_temp_rename_12345")
+        existing_data.name = new_name + "_copy"
+
+    obj.data.name = new_name
+
+    #if existing_data:
+        #existing_data.name = new_name
 
 def duplicate_for_static_mesh_collection(context, parent_collection):
     # Get prepped collection
@@ -111,7 +125,7 @@ def duplicate_for_static_mesh_collection(context, parent_collection):
             new_obj.data = obj.data.copy()
             new_obj.animation_data_clear()
             static_meshes_collection.objects.link(new_obj)
-            new_obj.name = "SM_" + obj.name
+            rename_object_and_data(new_obj, "SM_" + obj.name)
 
     # Get the wheels collections
     prepped_wheels_collection = bpy.data.collections["prepped_wheels"]
@@ -133,7 +147,7 @@ def duplicate_for_static_mesh_collection(context, parent_collection):
         new_obj.data = obj.data.copy()
         new_obj.animation_data_clear()
         static_meshes_collection.objects.link(new_obj)
-        new_obj.name = "SM_" + obj.name
+        rename_object_and_data(new_obj, "SM_" + obj.name)
         # Recenter static mesh to the origin
         new_obj.location -= wheel_location
 
@@ -144,7 +158,7 @@ def duplicate_for_static_mesh_collection(context, parent_collection):
         new_obj.data = obj.data.copy()
         new_obj.animation_data_clear()
         static_meshes_collection.objects.link(new_obj)
-        new_obj.name = "SM_" + obj.name
+        rename_object_and_data(new_obj, "SM_" + obj.name)
         # Recenter caliper to the origin according to the wheel location, not the caliper location
         # This means the caliper keeps it's relative location to the wheel
         new_obj.location -= wheel_location
