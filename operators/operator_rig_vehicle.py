@@ -101,6 +101,7 @@ def rename_object_and_data(obj, new_name):
 
     obj.data.name = new_name
 
+    # For some reason naming this data block the same as the object causes the new data to get the long name, and this retains the original name
     #if existing_data:
         #existing_data.name = new_name
 
