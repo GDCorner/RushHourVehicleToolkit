@@ -29,6 +29,10 @@ def export_static_usd_selected(filepath: str):
                           export_textures=True)
 
 
+def export_static_gltf_selected(filepath: str):
+    bpy.ops.export_scene.gltf(filepath=filepath, check_existing=False, use_selection=True)
+
+
 def export_skeletal_usd_selected(filepath: str):
     bpy.ops.wm.usd_export(filepath=filepath, check_existing=False, selected_objects_only=True, overwrite_textures=False,
                           export_textures=False, export_materials=False)
@@ -43,6 +47,9 @@ def export_vehicle_static_meshes(context, scene_filename: str, export_dir: str, 
     elif export_format == "usd":
         static_mesh_filename = static_mesh_filename + ".usd"
         log.info("Exporting static meshes as USD")
+    elif export_format == "gltf":
+        static_mesh_filename = static_mesh_filename + ".glb"
+        log.info("Exporting static meshes as GLTF")
     else:
         static_mesh_filename = static_mesh_filename + ".usd"
         log.warning("Unknown export format, defaulting to USD")
@@ -72,6 +79,8 @@ def export_vehicle_static_meshes(context, scene_filename: str, export_dir: str, 
 
     if export_format == "fbx":
         export_static_fbx_selected(filepath=static_mesh_filename)
+    elif export_format == "gltf":
+        export_static_gltf_selected(filepath=static_mesh_filename)
     else:
         export_static_usd_selected(filepath=static_mesh_filename)
 
