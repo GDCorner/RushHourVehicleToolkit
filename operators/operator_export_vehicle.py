@@ -300,7 +300,7 @@ def export_process(context):
     if not os.path.exists(export_dir):
         os.makedirs(export_dir)
 
-    exported_sm_files, exported_static_meshes = export_vehicle_static_meshes(context, scene_filename, export_dir, export_format="usd")
+    exported_sm_files, exported_static_meshes = export_vehicle_static_meshes(context, scene_filename, export_dir, export_format="fbx")
     exported_sm_files = [os.path.basename(x) for x in exported_sm_files]
 
     exported_sk_files, exported_skeletal_meshes = export_vehicle_skeletal_meshes(context, scene_filename, export_dir, export_format="fbx")
