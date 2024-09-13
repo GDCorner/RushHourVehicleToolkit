@@ -4,16 +4,17 @@
 
 # <pep8 compliant>
 
-import bpy
 import sys
 import importlib
+from . import rhvtinfo
 
 bl_info = {
     "name": "Rush Hour Unreal Vehicle Toolkit",
     "description": "Provides utilities and functions to easily create, setup and export vehicles for Unreal Engine 5 and Rush Hour",
     "author": "Philip Edwards (GDCorner) <philip@gdcorner.com>",
-    "version": (1, 5, 0),
-    "blender": (3, 3, 0),
+    "version": (1, 5, 1),
+    "blender": (3, 6, 0),
+    "supported_blender_versions": [(3, 6, 0), (4, 2, 0)],
     "category": "Vehicles",
     "doc_url": "https://www.gdcorner.com/products/RushHour.html",
 }
@@ -50,6 +51,7 @@ modulesNames = [
     'ui.warning_details.ui_warn_negative_scales_panel',
     'ui.warning_details.ui_warn_unexpected_length_panel',
     'ui.warning_details.ui_warn_wheel_sizes_panel',
+    'ui.warning_details.ui_warn_blender_version_panel'
 ]
 
 
@@ -85,6 +87,7 @@ def unregister():
             if hasattr(sys.modules[currentModuleName], 'unregister'):
                 sys.modules[currentModuleName].unregister()
 
+rhvtinfo.addon_bl_info = bl_info
 
 if __name__ == "__main__":
     register()
