@@ -25,7 +25,7 @@ def _check_blender_version(current_blender_version):
     log.info(f"Blender version: {current_blender_version}")
     log.info(f"Rush Hour Addon version: {addon_bl_info['version']}")
     # maximum supported blender version
-    supported_blender_versions = addon_bl_info.get("supported_blender_versions", [(3, 3, 0)])
+    supported_blender_versions = addon_bl_info.get("supported_blender_versions", [(3, 6, 0), (4, 2, 0)])
     if "blender" in addon_bl_info:
         _b_has_checked_blender_version = True
     else:
@@ -41,10 +41,12 @@ def _check_blender_version(current_blender_version):
     for compatible_version in supported_blender_versions:
         comp_blender_version_major_minor = compatible_version[:2]
         if current_blender_version_major_minor == comp_blender_version_major_minor:
-            log.info(f"Blender version is supported")
+            log.info(f"Blender version is supported, current: {current_blender_version_major_minor} compatible version: {comp_blender_version_major_minor}")
             _b_is_supported_blender_version = True
             return _b_is_supported_blender_version
 
+    # If we got here, the version is not supported
+    _b_is_supported_blender_version = False
     return _b_is_supported_blender_version
 
 
@@ -80,8 +82,10 @@ def test_blender_versions_check():
         log.info(f"Testing version: {version}, expected result: {expected_result}")
         actual_result = _check_blender_version(version)
         if actual_result != expected_result:
-            log.error(f"Test failed for version: {version}")
+            log.error(f"Test failed for version: {version}, expcted: {expected_result}, actual: {actual_result}")
             b_any_failed = True
+        else:
+            log.info(f"Test passed for version: {version}")
 
     if b_any_failed:
         log.error("Some tests failed")
