@@ -12,7 +12,7 @@ bl_info = {
     "name": "Rush Hour Unreal Vehicle Toolkit",
     "description": "Provides utilities and functions to easily create, setup and export vehicles for Unreal Engine 5 and Rush Hour",
     "author": "Philip Edwards (GDCorner) <philip@gdcorner.com>",
-    "version": (1, 5, 2),
+    "version": (1, 6, 0),
     "blender": (3, 6, 0),
     "supported_blender_versions": [(3, 6, 0), (4, 2, 0), (4, 5, 0)],
     "category": "Vehicles",
