@@ -14,7 +14,7 @@ bl_info = {
     "author": "Philip Edwards (GDCorner) <philip@gdcorner.com>",
     "version": (1, 5, 2),
     "blender": (3, 6, 0),
-    "supported_blender_versions": [(3, 6, 0), (4, 2, 0)],
+    "supported_blender_versions": [(3, 6, 0), (4, 2, 0), (4, 5, 0)],
     "category": "Vehicles",
     "doc_url": "https://www.gdcorner.com/products/RushHour.html",
 }
