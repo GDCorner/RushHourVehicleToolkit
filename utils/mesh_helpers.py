@@ -172,6 +172,13 @@ def fix_negative_scales(objects):
 
 def remove_blank_materials(objects):
     # Blank material slots on meshes causes issues when importing an FBX into unreal, causing all kinds of material reassignment chaos
+    use_selected_slot_method = False
+    if bpy.app.version[0] >= 4 and bpy.app.version[1] >= 2:
+        # The API changed in Blender 4.2 to not take an object, rather just operates on the selected object
+        use_selected_slot_method = True
+        for obj in objects:
+            obj.select_set(False)
+
     bpy.ops.object.select_all(action='DESELECT')
     for obj in objects:
         for slot in obj.material_slots:
@@ -181,7 +188,10 @@ def remove_blank_materials(objects):
                     title="Blank Material Slot Detected")
                 log.warning("Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal")
                 obj.active_material_index = obj.material_slots.find(slot.name)
-                bpy.ops.object.material_slot_remove({'object': obj})
+                if use_selected_slot_method:
+                    bpy.ops.object.material_slot_remove()
+                else:
+                    bpy.ops.object.material_slot_remove({'object': obj})
 
 
 def get_bounds_of_meshes(meshes):
