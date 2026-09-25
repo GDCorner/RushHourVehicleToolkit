@@ -25,7 +25,7 @@ def _check_blender_version(current_blender_version):
     log.info(f"Blender version: {current_blender_version}")
     log.info(f"Rush Hour Addon version: {addon_bl_info['version']}")
     # maximum supported blender version
-    supported_blender_versions = addon_bl_info.get("supported_blender_versions", [(3, 6, 0), (4, 2, 0), (4, 5, 0)])
+    supported_blender_versions = addon_bl_info.get("supported_blender_versions", [(3, 6, 0), (4, 2, 0), (4, 5, 0), (5, 2, 0)])
     if "blender" in addon_bl_info:
         _b_has_checked_blender_version = True
     else:
@@ -72,6 +72,12 @@ def test_blender_versions_check():
         (4, 2, 19): True,
         (4, 3, 0): False,
         (4, 4, 0): False,
+        (4, 5, 0): True,
+        (4, 5, 3): True,
+        (5, 0, 0): False,
+        (5, 1, 0): False,
+        (5, 2, 0): True,
+        (5, 2, 1): True,
     }
 
     b_any_failed = False
