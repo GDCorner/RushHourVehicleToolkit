@@ -125,8 +125,12 @@ def deduplicate_material_slots(target_object):
                     if poly.material_index == slot2idx:
                         poly.material_index = slot1idx
 
-    # Remove all unused slots
-    bpy.ops.object.material_slot_remove_unused()
+    # Remove all unused slots.
+    # Guard against objects with no material slots: in Blender 5.x the
+    # material_slot_remove_unused operator's poll() fails with "context is
+    # incorrect" when there are no slots, whereas older versions return CANCELLED.
+    if len(target_object.material_slots) > 0:
+        bpy.ops.object.material_slot_remove_unused()
 
     # deselect object
     target_object.select_set(False)
