@@ -48,8 +48,10 @@ def set_scene_scale_to_cm(context):
             obj.location = (obj.location[0] * 100, obj.location[1] * 100, obj.location[2] * 100)
 
         # Set the clip end difference to 1cm and 1000m
-        bpy.context.space_data.clip_start = 1.0
-        bpy.context.space_data.clip_end = 1000.0 * 100.0
+        # space_data is None in background mode (no 3D viewport), so guard against it
+        if bpy.context.space_data is not None:
+            bpy.context.space_data.clip_start = 1.0
+            bpy.context.space_data.clip_end = 1000.0 * 100.0
 
 
 def move_viewport_to_car():
@@ -69,7 +71,9 @@ class RUSHHOURVP_OT_set_scene_cm_scale(bpy.types.Operator):
 
     def execute(self, context):
         set_scene_scale_to_cm(context)
-        move_viewport_to_car()
+        # view3d ops require a 3D viewport area, which doesn't exist in background mode
+        if context.area is not None and context.area.type == 'VIEW_3D':
+            move_viewport_to_car()
         return {'FINISHED'}
 
 
