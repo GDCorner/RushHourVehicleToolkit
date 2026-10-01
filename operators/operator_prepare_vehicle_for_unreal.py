@@ -373,6 +373,10 @@ class RUSHHOURVP_OT_prepare_vehicle_for_unreal(bpy.types.Operator):
                     'wheel_prefix': 'wheel_ prefix conflict',
                     'sk_prefix': 'SK_ prefix conflict',
                     'sm_prefix': 'SM_ prefix conflict',
+                    'sk_exact': 'Exact SK_ name conflict',
+                    'sm_exact': 'Exact SM_ name conflict',
+                    'sk_export': 'SK_ export name conflict',
+                    'sm_export': 'SM_ export name conflict',
                 }
                 conflict_lines.append(
                     f"  - '{obj_name}' ({type_labels.get(conflict_type, conflict_type)})"

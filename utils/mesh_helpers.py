@@ -100,17 +100,31 @@ def check_name_conflicts(context):
                         ]))
     
     # Check SK_ and SM_ prefix conflicts (skeletal and static mesh exports)
-    for obj_name in scene_objects:
-        if obj_name.startswith("SK_") and obj_name not in HARDCODED_PREP_NAMES:
-            conflicts.append((obj_name, 'sk_prefix', [
-                "renamed_" + obj_name,
-                obj_name + "_original"
-            ]))
-        if obj_name.startswith("SM_") and obj_name not in HARDCODED_PREP_NAMES:
-            conflicts.append((obj_name, 'sm_prefix', [
-                "renamed_" + obj_name,
-                obj_name + "_original"
-            ]))
+    # Only check for specific hardcoded names and names that would be generated
+    # from objects in the "prepped" collection, not the entire prefix
+    
+    # Check exact hardcoded SK_ names
+    for name in ["SK_phys_mesh", "SK_proxy"]:
+        if name in scene_objects:
+            conflicts.append((name, 'sk_exact', [name + "_conflict"]))
+    
+    # Check for SM_/SK_ names that would conflict with generated export names
+    # Export generates: SM_{prepped_obj_name} and SK_{prepped_obj_name}
+    prepped_col = bpy.data.collections.get("prepped")
+    if prepped_col:
+        for obj in prepped_col.objects:
+            sm_name = "SM_" + obj.name
+            sk_name = "SK_" + obj.name
+            if sm_name in scene_objects:
+                conflicts.append((sm_name, 'sm_export', [
+                    "renamed_" + sm_name,
+                    sm_name + "_original"
+                ]))
+            if sk_name in scene_objects:
+                conflicts.append((sk_name, 'sk_export', [
+                    "renamed_" + sk_name,
+                    sk_name + "_original"
+                ]))
     
     return conflicts
 
