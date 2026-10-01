@@ -1,4 +1,4 @@
-# Copyright © 2024 GDCorner
+# Copyright © 2024-2026 GDCorner
 # This is licensed under the MIT license. See the LICENSE file for full details
 # https://choosealicense.com/licenses/mit/
 
