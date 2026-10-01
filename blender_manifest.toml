@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "gdcorner_rush_hour_vehicle_toolkit"
-version = "1.6.2"
+version = "1.6.3"
 name = "Rush Hour Unreal Vehicle Toolkit"
 tagline = "Prepare vehicles for Unreal Engine 5 and Rush Hour"
 maintainer = "GDCorner <philip@gdcorner.com>"

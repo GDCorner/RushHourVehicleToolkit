@@ -16,6 +16,34 @@ This addon is only tested against the active LTS versions of Blender. Other vers
 - 4.5 LTS
 - 5.2 LTS
 
+## Validating & Packaging
+
+This addon follows the [Blender Extensions](https://docs.blender.org/manual/en/latest/advanced/extensions/getting_started.html) format. The manifest (`blender_manifest.toml`) contains all required metadata and build configuration.
+
+### Validate
+
+To validate the manifest without building the package:
+
+```bash
+blender --command extension validate
+```
+
+To validate a built `.zip` package:
+
+```bash
+blender --command extension validate gdcorner_rush_hour_vehicle_toolkit-1.6.2.zip
+```
+
+### Build
+
+To build the extension `.zip` package from the addon directory:
+
+```bash
+blender --command extension build
+```
+
+This produces `gdcorner_rush_hour_vehicle_toolkit-1.6.2.zip` (version may vary), ready for installation or publishing to the [Blender Extensions Platform](https://extensions.blender.org).
+
 ## License
 
 The Rush Hour Unreal Vehicle Toolkit Blender addon is licensed under the MIT license. For full details please read the LICENSE file.
