@@ -13,7 +13,9 @@ def show_warning_message(message="", title="Scene Scale", icon='ERROR'):
         return
 
     def draw(self, context):
-        self.layout.label(text=message)
+        lines = message.split('\n')
+        for line in lines:
+            self.layout.label(text=line)
 
     bpy.context.window_manager.popup_menu(draw, title=title, icon=icon)
 

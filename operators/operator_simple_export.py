@@ -21,25 +21,24 @@ This operator automatically runs the Prep, Rig and Export operators from the Rus
     def execute(self, context):
         #prep
         try:
-            bpy.ops.rushhourvp.prep_vehicle_for_unreal()
+            bpy.ops.rushhourvp.prep_vehicle_for_unreal('EXEC_DEFAULT')
         except RuntimeError as ex:
-            log.error(f"Error while prepping vehicle: {ex}")
-            self.report({'ERROR'}, f"Error while prepping vehicle: {ex}")
-            return {'CANCELLED'}
+            log.error(f"Vehicle prep was cancelled: {ex}")
+            return {'FINISHED'}
 
         #rig
         try:
-            bpy.ops.rushhourvp.rig_vehicle(decimate_proxy_mesh=True, decimate_amount=0.5)
+            bpy.ops.rushhourvp.rig_vehicle('EXEC_DEFAULT', decimate_proxy_mesh=True, decimate_amount=0.5)
         except RuntimeError as ex:
-            log.error(f"Error while rigging vehicle: {ex}")
-            return {'CANCELLED'}
+            log.error(f"Vehicle rig was cancelled: {ex}")
+            return {'FINISHED'}
 
         #export
         try:
-            bpy.ops.rushhourvp.export_ue_vehicle_fbx()
+            bpy.ops.rushhourvp.export_ue_vehicle_fbx('EXEC_DEFAULT')
         except RuntimeError as ex:
-            log.error(f"Error while exporting vehicle: {ex}")
-            return {'CANCELLED'}
+            log.error(f"Vehicle export was cancelled: {ex}")
+            return {'FINISHED'}
 
         # Hide rigged and prepped collections
         view_layer = bpy.context.view_layer

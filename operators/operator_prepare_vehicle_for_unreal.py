@@ -6,6 +6,7 @@ import bpy
 
 from ..utils import collection_helpers
 from ..utils import mesh_helpers
+from ..utils import message_helpers
 
 
 # Create proxy mesh with single tiny triangle at 0,0,0.
@@ -361,6 +362,32 @@ class RUSHHOURVP_OT_prepare_vehicle_for_unreal(bpy.types.Operator):
     bl_label = "Prepare Vehicle For Unreal"
 
     def execute(self, context):
+        # Pre-flight check for name conflicts
+        conflicts = mesh_helpers.check_name_conflicts(context)
+        if conflicts:
+            conflict_lines = []
+            for obj_name, conflict_type, suggestions in conflicts:
+                type_labels = {
+                    'exact': 'Exact name conflict',
+                    'body_prefix': 'body_ prefix conflict',
+                    'wheel_prefix': 'wheel_ prefix conflict',
+                    'sk_prefix': 'SK_ prefix conflict',
+                    'sm_prefix': 'SM_ prefix conflict',
+                }
+                conflict_lines.append(
+                    f"  - '{obj_name}' ({type_labels.get(conflict_type, conflict_type)})"
+                )
+            conflict_msg = (
+                "Name conflict detected: the following scene objects use names "
+                "reserved by the vehicle prep/export workflow. Please rename them before proceeding:\n\n"
+                + "\n".join(conflict_lines)
+                + "\n\nSuggested fixes: rename conflicting objects to something other than "
+                "'body', 'proxy', 'wheel_N_L/R', 'SK_*', or 'SM_*'."
+            )
+            message_helpers.show_warning_message(conflict_msg, title="Name Conflict - Vehicle Prep")
+            self.report({'ERROR'}, conflict_msg)
+            return {'CANCELLED'}
+
         prep_vehicle_process(context)
         bpy.ops.rushhourvp.check_vehicle()
         return {'FINISHED'}
