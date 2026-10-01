@@ -122,7 +122,29 @@ SCRIPT="$REPO/test_runner.py"
 
 ---
 
-## 3. Individual operator tests
+## 3. Remove the addon (optional)
+
+After testing, you can remove the addon from all Blender versions' user addon
+directories. This is useful when testing a new version — the `rsync --delete`
+install step already removes stale files, but this step fully cleans up the
+addon directories.
+
+```bash
+base="$HOME/Library/Application Support/Blender"
+for v in 3.6 4.2 4.5 5.2; do
+  DEST="$base/$v/scripts/addons/RushHourVehicleToolkit"
+  if [ -d "$DEST" ]; then
+    rm -rf "$DEST"
+    echo "Removed $DEST"
+  else
+    echo "Not found: $DEST"
+  fi
+done
+```
+
+---
+
+## 4. Individual operator tests
 
 Each flag runs a single operator (auto-building any prerequisite scene state) so
 you can isolate a specific step. Replace `--full-pipeline` with one of these:
@@ -155,7 +177,7 @@ Combine multiple tests in one invocation:
 
 ---
 
-## 4. Options
+## 5. Options
 
 | Option | Description |
 |--------|-------------|
@@ -172,7 +194,7 @@ since `prepare_scene_simple` hardcodes 2 axles.
 
 ---
 
-## 5. Where the output goes
+## 6. Where the output goes
 
 Both the generated scene and the exported assets are written to a folder that
 matches the **major.minor** version of the Blender that ran the test:
@@ -193,7 +215,7 @@ output directory from the saved blend file's location, so both land side by side
 
 ---
 
-## 6. Interpreting results
+## 7. Interpreting results
 
 - The run ends with `ALL TESTS PASSED` (exit code `0`) or `SOME TESTS FAILED`
   (exit code `1`).
