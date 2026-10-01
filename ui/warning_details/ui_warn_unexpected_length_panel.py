@@ -63,12 +63,12 @@ class RUSHHOURVP_PT_warn_unexpected_vehicle_length_panel(bpy.types.Panel):
 
 
 def register():
-    print("Registering Nanite Material Warning Panel UI")
+    print("Registering Unexpected Vehicle Length Warning Panel UI")
     bpy.utils.register_class(RUSHHOURVP_PT_warn_unexpected_vehicle_length_panel)
 
 
 def unregister():
-    print("Un-Registering Nanite Material Warning Panel UI")
+    print("Un-Registering Unexpected Vehicle Length Warning Panel UI")
     bpy.utils.unregister_class(RUSHHOURVP_PT_warn_unexpected_vehicle_length_panel)
 
 

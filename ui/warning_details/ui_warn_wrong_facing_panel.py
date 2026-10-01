@@ -61,12 +61,12 @@ class RUSHHOURVP_PT_warn_wrong_facing_panel(bpy.types.Panel):
 
 
 def register():
-    print("Registering Nanite Material Warning Panel UI")
+    print("Registering Wrong Facing Warning Panel UI")
     bpy.utils.register_class(RUSHHOURVP_PT_warn_wrong_facing_panel)
 
 
 def unregister():
-    print("Un-Registering Nanite Material Warning Panel UI")
+    print("Un-Registering Wrong Facing Warning Panel UI")
     bpy.utils.unregister_class(RUSHHOURVP_PT_warn_wrong_facing_panel)
 
 

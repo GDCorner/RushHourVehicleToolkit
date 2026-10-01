@@ -43,12 +43,12 @@ class RUSHHOURVP_PT_warn_file_not_saved_panel(bpy.types.Panel):
 
 
 def register():
-    print("Registering Nanite Material Warning Panel UI")
+    print("Registering File Not Saved Warning Panel UI")
     bpy.utils.register_class(RUSHHOURVP_PT_warn_file_not_saved_panel)
 
 
 def unregister():
-    print("Un-Registering Nanite Material Warning Panel UI")
+    print("Un-Registering File Not Saved Warning Panel UI")
     bpy.utils.unregister_class(RUSHHOURVP_PT_warn_file_not_saved_panel)
 
 
