@@ -291,7 +291,7 @@ def export_process(context):
     # Force all objects in the export collection to be visible or export will be blank meshes
     original_visibilities = force_export_collection_visible()
 
-    scene_filename_full = bpy.path.basename(context.blend_data.filepath)
+    scene_filename_full = bpy.path.basename(bpy.data.filepath)
     scene_filename = os.path.splitext(scene_filename_full)[0]
     scene_filename = fix_forbidden_chars(scene_filename)
 

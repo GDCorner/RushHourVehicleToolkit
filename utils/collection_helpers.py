@@ -24,7 +24,7 @@ def create_top_level_collection(collection_name):
     if collection_name in bpy.data.collections:
         return bpy.data.collections[collection_name]
 
-    new_collection = bpy.context.blend_data.collections.new(name=collection_name)
+    new_collection = bpy.data.collections.new(name=collection_name)
     bpy.context.scene.collection.children.link(new_collection)
     return new_collection
 
@@ -34,7 +34,7 @@ def create_collection(collection_name, parent_collection):
     if collection_name in parent_collection.children:
         return parent_collection.children[collection_name]
 
-    new_collection = bpy.context.blend_data.collections.new(name=collection_name)
+    new_collection = bpy.data.collections.new(name=collection_name)
     parent_collection.children.link(new_collection)
 
     return new_collection

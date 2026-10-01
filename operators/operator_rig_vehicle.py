@@ -7,6 +7,21 @@ from mathutils import Vector
 from ..utils import collection_helpers
 
 
+class RUSHHOURVP_RigVehicleProps(bpy.types.PropertyGroup):
+    rh_decimate_proxy_mesh: bpy.props.BoolProperty(
+        name='Decimate Proxy Mesh',
+        default=True,
+        description="Whether to decimate the proxy mesh before export"
+    )
+    rh_decimate_amount: bpy.props.FloatProperty(
+        name='Decimate Amount',
+        default=0.1,
+        min=0.01,
+        max=1.0,
+        description="How much to decimate the proxy mesh by"
+    )
+
+
 def add_child_bone(context, name, armature, location, parent, bone_length=1):
     bone = armature.edit_bones.new(name)
     bone.parent = parent
@@ -20,7 +35,11 @@ def assign_mesh_to_vertex_group(context, mesh, vertex_group_name):
     # Deselect everything
     bpy.ops.object.select_all(action='DESELECT')
 
-    unused_vertex_group_names = mesh.vertex_groups.keys()
+    # Create vertex group if it doesn't exist
+    if vertex_group_name not in mesh.vertex_groups:
+        mesh.vertex_groups.new(name=vertex_group_name)
+
+    unused_vertex_group_names = list(mesh.vertex_groups.keys())
     unused_vertex_group_names.remove(vertex_group_name)
 
     # Get the index of each vertex
@@ -275,7 +294,7 @@ def rig_vehicle(context, decimate_proxy_mesh: bool = True, decimate_amount: floa
     # Set the armature to the active object
     context.view_layer.objects.active = armature_obj
     # Parent the meshes to the armature
-    bpy.ops.object.parent_set(type='ARMATURE_NAME')
+    bpy.ops.object.parent_set(type='OBJECT')
 
     # Deselect everything
     bpy.ops.object.select_all(action='DESELECT')
@@ -322,32 +341,24 @@ class RUSHHOURVP_OT_rig_vehicle(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        rig_vehicle(context, self.decimate_proxy_mesh, self.decimate_amount)
+        decimate_proxy_mesh = self.decimate_proxy_mesh
+        decimate_amount = self.decimate_amount
+        rig_vehicle(context, decimate_proxy_mesh, decimate_amount)
         return {'FINISHED'}
 
 
 def register():
-    print("Registering create vehicles operator")
-    bpy.types.Scene.rh_decimate_proxy_mesh = bpy.props.BoolProperty(
-        name='Decimate Proxy Mesh',
-        default=True,
-        description="Whether to decimate the proxy mesh before export"
-    )
-    bpy.types.Scene.rh_decimate_amount = bpy.props.FloatProperty(
-        name='Decimate Amount',
-        default=0.1,
-        min=0.01,
-        max=1.0,
-        description="How much to decimate the proxy mesh by"
-    )
+    print("Registering rig vehicle operator")
+    bpy.utils.register_class(RUSHHOURVP_RigVehicleProps)
     bpy.utils.register_class(RUSHHOURVP_OT_rig_vehicle)
+    bpy.types.Scene.rushhourvp_rig_vehicle_props = bpy.props.PointerProperty(type=RUSHHOURVP_RigVehicleProps)
 
 
 def unregister():
-    print("Un-Registering create vehicles operator")
-    del bpy.types.Scene.rh_decimate_proxy_mesh
-    del bpy.types.Scene.rh_decimate_amount
+    print("Un-Registering rig vehicle operator")
     bpy.utils.unregister_class(RUSHHOURVP_OT_rig_vehicle)
+    bpy.utils.unregister_class(RUSHHOURVP_RigVehicleProps)
+    del bpy.types.Scene.rushhourvp_rig_vehicle_props
 
 
 if __name__ == "__main__":

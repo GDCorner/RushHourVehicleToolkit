@@ -21,10 +21,10 @@ class RUSHHOURVP_PT_advanced_vehicle_panel(bpy.types.Panel):
         row = layout.row()
         row.label(text="Create Standard Collections", icon='WORLD_DATA')
         row = layout.row()
-        row.prop(context.scene, "axle_count")
+        row.prop(context.scene, "rushhourvp_create_collections_props.axle_count")
         row = layout.row()
         vehicle_col_op = row.operator("rushhourvp.create_vehicle_collections", text="Create Standard Collections")
-        vehicle_col_op.axle_count = context.scene.axle_count
+        vehicle_col_op.axle_count = context.scene.rushhourvp_create_collections_props.axle_count
 
         layout.separator(factor=2)
 
@@ -54,13 +54,13 @@ class RUSHHOURVP_PT_advanced_vehicle_panel(bpy.types.Panel):
 
 
         row = layout.row()
-        row.prop(context.scene, "rh_decimate_proxy_mesh")
+        row.prop(context.scene, "rushhourvp_rig_vehicle_props.rh_decimate_proxy_mesh")
         row = layout.row()
-        row.prop(context.scene, "rh_decimate_amount")
+        row.prop(context.scene, "rushhourvp_rig_vehicle_props.rh_decimate_amount")
         row = layout.row()
         rig_op = row.operator("rushhourvp.rig_vehicle", text="Rig Vehicle For Export")
-        rig_op.decimate_proxy_mesh = context.scene.rh_decimate_proxy_mesh
-        rig_op.decimate_amount = context.scene.rh_decimate_amount
+        rig_op.decimate_proxy_mesh = context.scene.rushhourvp_rig_vehicle_props.rh_decimate_proxy_mesh
+        rig_op.decimate_amount = context.scene.rushhourvp_rig_vehicle_props.rh_decimate_amount
 
         layout.separator(factor=2)
 

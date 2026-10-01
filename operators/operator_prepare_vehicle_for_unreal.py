@@ -25,30 +25,14 @@ def create_proxy_mesh():
     return mesh_obj
 
 def ensure_custom_weights_exist(obj):
-    if bpy.app.version >= (4, 0, 0):
-        if "bevel_weight_vert" not in obj.data.attributes:
-            obj.data.attributes.new(name="bevel_weight_vert", type='FLOAT', domain='POINT')
-        if "bevel_weight_edge" not in obj.data.attributes:
-            obj.data.attributes.new(name="bevel_weight_edge", type='FLOAT', domain='EDGE')
-        if "crease_vertex" not in obj.data.attributes:
-            obj.data.attributes.new(name="crease_vertex", type='FLOAT', domain='POINT')
-        if "crease_edge" not in obj.data.attributes:
-            obj.data.attributes.new(name="crease_edge", type='FLOAT', domain='EDGE')
-    elif bpy.app.version >= (3, 4, 0):
-        # if blender 3.4 or newer, use the new operator
-        if not obj.data.has_bevel_weight_vertex:
-            bpy.ops.mesh.customdata_bevel_weight_vertex_add()
-        if not obj.data.has_bevel_weight_edge:
-            bpy.ops.mesh.customdata_bevel_weight_edge_add()
-        if not obj.data.has_crease_vertex:
-            bpy.ops.mesh.customdata_crease_vertex_add()
-        if not obj.data.has_crease_edge:
-            bpy.ops.mesh.customdata_crease_edge_add()
-    else:
-        # Older versions
-        obj.data.use_customdata_vertex_bevel = True
-        obj.data.use_customdata_edge_bevel = True
-        obj.data.use_customdata_edge_crease = True
+    if "bevel_weight_vert" not in obj.data.attributes:
+        obj.data.attributes.new(name="bevel_weight_vert", type='FLOAT', domain='POINT')
+    if "bevel_weight_edge" not in obj.data.attributes:
+        obj.data.attributes.new(name="bevel_weight_edge", type='FLOAT', domain='EDGE')
+    if "crease_vertex" not in obj.data.attributes:
+        obj.data.attributes.new(name="crease_vertex", type='FLOAT', domain='POINT')
+    if "crease_edge" not in obj.data.attributes:
+        obj.data.attributes.new(name="crease_edge", type='FLOAT', domain='EDGE')
 
 def merge_objects(context, objects, new_name):
     # Deselect any objects that might still be selected
@@ -79,7 +63,7 @@ def merge_objects(context, objects, new_name):
     new_objects = bpy.context.selected_objects
     for new_obj in new_objects:
         # Disable auto worldspace uv
-        new_obj.enable_auto_uv = False
+        new_obj.rushhourvp_auto_uv_props.enable_auto_uv = False
 
     bpy.ops.object.select_all(action='DESELECT')
     for curr_object in new_objects:

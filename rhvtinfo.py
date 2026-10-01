@@ -7,12 +7,13 @@ import logging
 
 log = logging.getLogger(__name__)
 
-if 'addon_bl_info' in globals():
-    pass
-    # addon_bl_info exists as it's been set by the main module
-else:
-    # Only set this to none if it doesn't already exist
-    addon_bl_info = {"version": (0, 0, 0)}
+ADDON_VERSION = (1, 6, 2)
+
+SUPPORTED_BLENDER_VERSIONS = [
+    (4, 2, 0),
+    (4, 5, 0),
+    (5, 2, 0),
+]
 
 _b_is_supported_blender_version = False
 _b_has_checked_blender_version = False
@@ -23,22 +24,15 @@ def _check_blender_version(current_blender_version):
     global _b_is_supported_blender_version
     log.info(f"Checking Blender Version Compatibility with Rush Hour Vehicle Toolkit")
     log.info(f"Blender version: {current_blender_version}")
-    log.info(f"Rush Hour Addon version: {addon_bl_info['version']}")
-    # maximum supported blender version
-    supported_blender_versions = addon_bl_info.get("supported_blender_versions", [(3, 6, 0), (4, 2, 0), (4, 5, 0), (5, 2, 0)])
-    if "blender" in addon_bl_info:
-        _b_has_checked_blender_version = True
-    else:
-        # Not the real version, just a placeholder, so don't mark as checked
-        log.warning("No Blender version specified in addon_bl_info for Rush Hour Vehicle Toolkit")
-        log.warning(addon_bl_info)
-        _b_has_checked_blender_version = False
+    log.info(f"Rush Hour Addon version: {ADDON_VERSION}")
+
+    _b_has_checked_blender_version = True
 
     log.info(f"Checking Blender version: {current_blender_version}")
-    log.info(f"Supported Blender versions: {supported_blender_versions}")
+    log.info(f"Supported Blender versions: {SUPPORTED_BLENDER_VERSIONS}")
 
     current_blender_version_major_minor = current_blender_version[:2]
-    for compatible_version in supported_blender_versions:
+    for compatible_version in SUPPORTED_BLENDER_VERSIONS:
         comp_blender_version_major_minor = compatible_version[:2]
         if current_blender_version_major_minor == comp_blender_version_major_minor:
             log.info(f"Blender version is supported, current: {current_blender_version_major_minor} compatible version: {comp_blender_version_major_minor}")
@@ -58,14 +52,10 @@ def is_supported_blender_version():
 
 def test_blender_versions_check():
     logging.basicConfig(level=logging.DEBUG)
-    log.info("Testing Blender version check")
+    log.info("Testing Blender Version check")
     versions = {
-        (3, 3, 200): False,
-        (3, 3, 0): False,
-        (3, 4, 0): False,
-        (3, 5, 0): False,
-        (3, 6, 0): True,
-        (3, 6, 12): True,
+        (3, 6, 0): False,
+        (3, 6, 12): False,
         (4, 0, 0): False,
         (4, 1, 0): False,
         (4, 2, 0): True,

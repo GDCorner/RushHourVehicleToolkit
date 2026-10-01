@@ -92,7 +92,7 @@ def get_uv_islands(curr_object: bpy.types.Object):
 
     # unselect all
     bpy.ops.mesh.select_all(action='DESELECT')
-    bpy.ops.uv.select(deselect_all=True)
+    bpy.ops.uv.select_all(action='DESELECT')
 
     # create a bmesh
     bm: bmesh.types.BMesh = bmesh.from_edit_mesh(mesh_data)

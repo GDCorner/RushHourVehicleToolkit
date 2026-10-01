@@ -5,9 +5,16 @@
 import bpy
 
 
+class RUSHHOURVP_ObjectAutoUVProps(bpy.types.PropertyGroup):
+    enable_auto_uv: bpy.props.BoolProperty(
+        name="Enable Auto UV",
+        default=False
+    )
+
+
 def enable_auto_uv_on_selected_objects(context, enable_auto_uv=True):
-    for sel_object in bpy.context.selected_objects:
-        sel_object.enable_auto_uv = enable_auto_uv
+    for sel_object in context.selected_objects:
+        sel_object.rushhourvp_auto_uv_props.enable_auto_uv = enable_auto_uv
 
 
 class RUSHHOURVP_OT_tag_objects_for_auto_uv(bpy.types.Operator):
@@ -42,18 +49,17 @@ def menu_tag_enable_auto_uv(self, context):
 
 def register():
     print("Registering Auto UV Tag operator")
+    bpy.utils.register_class(RUSHHOURVP_ObjectAutoUVProps)
     bpy.utils.register_class(RUSHHOURVP_OT_tag_objects_for_auto_uv)
     bpy.types.VIEW3D_MT_object.append(menu_tag_enable_auto_uv)
     bpy.types.VIEW3D_MT_object.append(menu_tag_disable_auto_uv)
-    bpy.types.Object.enable_auto_uv = bpy.props.BoolProperty(
-        name="Enable Auto UV",
-        default=False
-    )
+    bpy.types.Object.rushhourvp_auto_uv_props = bpy.props.PointerProperty(type=RUSHHOURVP_ObjectAutoUVProps)
 
 
 def unregister():
     print("Un-Registering Auto UV Tag operator")
     bpy.utils.unregister_class(RUSHHOURVP_OT_tag_objects_for_auto_uv)
+    bpy.utils.unregister_class(RUSHHOURVP_ObjectAutoUVProps)
     bpy.types.VIEW3D_MT_object.remove(menu_tag_enable_auto_uv)
     bpy.types.VIEW3D_MT_object.remove(menu_tag_disable_auto_uv)
-    del bpy.types.Object.enable_auto_uv
+    del bpy.types.Object.rushhourvp_auto_uv_props

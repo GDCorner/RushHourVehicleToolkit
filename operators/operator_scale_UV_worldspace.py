@@ -9,7 +9,7 @@ from ..utils import mesh_helpers, uv_helpers
 
 
 def apply_worldspace_uvs(context, curr_object: bpy.types.Object, apply_modifiers=True, apply_scale=True):
-    if curr_object.enable_auto_uv is False:
+    if curr_object.rushhourvp_auto_uv_props.enable_auto_uv is False:
         print("Skipping object marked for disabled auto UV " + curr_object.name)
         return
     bpy.context.view_layer.objects.active = curr_object

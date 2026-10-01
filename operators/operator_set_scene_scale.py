@@ -49,9 +49,14 @@ def set_scene_scale_to_cm(context):
 
         # Set the clip end difference to 1cm and 1000m
         # space_data is None in background mode (no 3D viewport), so guard against it
-        if bpy.context.space_data is not None:
-            bpy.context.space_data.clip_start = 1.0
-            bpy.context.space_data.clip_end = 1000.0 * 100.0
+        for area in bpy.context.screen.areas:
+            if area.type == 'VIEW_3D':
+                for space in area.spaces:
+                    if space.type == 'VIEW_3D':
+                        space.clip_start = 1.0
+                        space.clip_end = 1000.0 * 100.0
+                        break
+                break
 
 
 def move_viewport_to_car():
