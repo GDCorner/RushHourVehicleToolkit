@@ -6,6 +6,12 @@ import bpy
 
 
 def show_warning_message(message="", title="Scene Scale", icon='ERROR'):
+    print(f"{title} (warning): {message}")
+
+    # popup_menu requires a window, which doesn't exist in background mode
+    if bpy.app.background:
+        return
+
     def draw(self, context):
         self.layout.label(text=message)
 
@@ -13,6 +19,12 @@ def show_warning_message(message="", title="Scene Scale", icon='ERROR'):
 
 
 def show_info_message(message="", title="Scene Scale", icon='INFO'):
+    print(f"{title} (info): {message}")
+
+    # popup_menu requires a window, which doesn't exist in background mode
+    if bpy.app.background:
+        return
+
     def draw(self, context):
         self.layout.label(text=message)
 
