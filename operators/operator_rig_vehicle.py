@@ -112,11 +112,22 @@ def duplicate_meshes_for_skeletal_mesh(context, skel_collection, decimate_proxy_
 def rename_object_and_data(obj, new_name):
     obj.name = new_name
 
-    # get existing data block with name "new_name"
-    if new_name in bpy.data.meshes:
+    # Ensure the data block ends up with the exact, predictable name `new_name`
+    # (this is the name Unreal sees on the right-hand side of the export
+    # manifest). If a *different* data block currently holds that name, move it
+    # out of the way first. We pick a unique displacement name (rather than a
+    # bare "_copy") so the displacement itself can never collide and leak a
+    # ".001"/"_copy" suffix into a name the exporter relies on.
+    if obj.data.name != new_name and new_name in bpy.data.meshes:
         existing_data = bpy.data.meshes[new_name]
-        print("Found existing data block with name " + new_name + ", renaming to " + new_name + "_temp_rename_12345")
-        existing_data.name = new_name + "_copy"
+        base = new_name + "_copy"
+        displaced = base
+        suffix = 1
+        while displaced in bpy.data.meshes:
+            displaced = f"{base}.{suffix:03d}"
+            suffix += 1
+        print("Found existing data block with name " + new_name + ", renaming to " + displaced)
+        existing_data.name = displaced
 
     obj.data.name = new_name
 
