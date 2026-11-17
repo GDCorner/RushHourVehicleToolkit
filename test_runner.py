@@ -35,6 +35,14 @@ Examples:
     blender -b --python test_runner.py -- --test-rig
     blender -b --python test_runner.py -- --test-export
 
+    # Regression tests (1.6.2 invalid skeleton / unpredictable mesh names).
+    # These run the full pipeline on a fresh scene, clear the export folder
+    # first, then validate the exported FBX skin structure and the JSON
+    # manifest names.
+    blender -b --python test_runner.py -- --test-skeleton
+    blender -b --python test_runner.py -- --test-manifest
+    blender -b --python test_runner.py -- --test-export-validation
+
     # Test with an existing blend file (must be saved for export to work)
     blender -b --python test_runner.py -- --file scene.blend --full-pipeline
 """
@@ -45,6 +53,9 @@ import os
 import math
 import argparse
 import glob as glob_mod
+import json
+import re
+import shutil
 import time
 import tempfile
 
@@ -164,12 +175,34 @@ def save_scene(filepath):
         return False
 
 
+def _make_material(name, color):
+    """Create (or reuse) a simple Principled BSDF material.
+
+    The test scene assigns a material to every mesh so that the export
+    actually exercises the material path - a regression that silently drops
+    materials from the export would otherwise go unnoticed.
+    """
+    mat = bpy.data.materials.get(name)
+    if mat is None:
+        mat = bpy.data.materials.new(name)
+    if hasattr(mat, "use_nodes"):
+        mat.use_nodes = True
+    tree = mat.node_tree
+    if tree:
+        for node in tree.nodes:
+            if node.type == 'BSDF_PRINCIPLED' and "Base Color" in node.inputs:
+                node.inputs["Base Color"].default_value = (color[0], color[1], color[2], 1.0)
+    return mat
+
+
 def create_test_scene(axle_count=2):
     """Create a self-contained test scene with synthetic vehicle geometry.
 
     Creates:
     - Multiple body-part cubes (chassis, hood, doors) to exercise the merge logic
     - For each wheel position: tire, rim, and brake_caliper cubes
+    - A material assigned to every mesh (body/wheel/rim/caliper) so the
+      export's material path is exercised
     - All objects placed in the scene root, unsorted
 
     Returns the path to the saved temp scene file.
@@ -182,6 +215,12 @@ def create_test_scene(axle_count=2):
         bpy.data.objects.remove(obj, do_unlink=True)
     for col in bpy.data.collections[:]:
         bpy.data.collections.remove(col)
+
+    # One material per part type (distinct colors make dropped materials obvious)
+    body_mat = _make_material("mat_body", (0.75, 0.12, 0.12))
+    wheel_mat = _make_material("mat_wheel", (0.08, 0.08, 0.08))
+    rim_mat = _make_material("mat_rim", (0.70, 0.70, 0.72))
+    caliper_mat = _make_material("mat_caliper", (0.10, 0.20, 0.75))
 
     side_labels = ["L", "R"]
     object_defs = []
@@ -199,6 +238,7 @@ def create_test_scene(axle_count=2):
         part = bpy.context.active_object
         part.name = name
         part.scale = scale
+        part.data.materials.append(body_mat)
         object_defs.append(name)
         print(f"  Created {name} at {part.location} scale {part.scale}")
 
@@ -222,6 +262,7 @@ def create_test_scene(axle_count=2):
             tire = bpy.context.active_object
             tire.name = f"tire_{axle}_{side}"
             tire.scale = (0.6, 0.4, 0.6)  # Wheel dimensions
+            tire.data.materials.append(wheel_mat)
             object_defs.append(tire.name)
             print(f"  Created {tire.name} at {tire.location}")
 
@@ -231,6 +272,7 @@ def create_test_scene(axle_count=2):
             rim = bpy.context.active_object
             rim.name = f"rim_{axle}_{side}"
             rim.scale = (0.35, 0.1, 0.35)
+            rim.data.materials.append(rim_mat)
             object_defs.append(rim.name)
             print(f"  Created {rim.name} at {rim.location}")
 
@@ -240,6 +282,7 @@ def create_test_scene(axle_count=2):
             caliper = bpy.context.active_object
             caliper.name = f"brake_caliper_{axle}_{side}"
             caliper.scale = (0.2, 0.15, 0.2)
+            caliper.data.materials.append(caliper_mat)
             object_defs.append(caliper.name)
             print(f"  Created {caliper.name} at {caliper.location}")
 
@@ -532,15 +575,437 @@ def test_rig_vehicle(context, args):
     return passed == len(checks)
 
 
+# ============================================================================
+# Export validation (regression tests)
+# ============================================================================
+#
+# These checks guard against two regressions that shipped in 1.6.2:
+#
+#   1. Invalid skeleton: the exported skeletal FBX contained no skin at all
+#      (no Deformer/Skin/Cluster/Pose elements), so Unreal rejected the
+#      skeleton. Root cause: the skeletal meshes were parented to the
+#      armature with parent_set(type='OBJECT') instead of
+#      type='ARMATURE_NAME', which stops the FBX exporter from binding the
+#      meshes to the armature.
+#
+#   2. Unpredictable mesh names: the export JSON manifest listed mesh data
+#      names with '.001'/'_copy' suffixes on the right-hand side of the
+#      'object:data' entries, breaking Unreal's predictable-name lookups.
+#
+# All checks run against a FRESH export: the export directory is deleted
+# before exporting, so artifacts left behind by a previous (possibly broken)
+# run can never make a later run appear valid.
+
+
+def _scene_name():
+    """The scene name the export operator uses for its output files
+    (blend filename without extension, with forbidden chars replaced,
+    mirroring operator_export_vehicle.fix_forbidden_chars)."""
+    name = os.path.splitext(os.path.basename(bpy.data.filepath))[0] if bpy.data.filepath else "test"
+    for char in (" ", ".", "-"):
+        name = name.replace(char, "_")
+    return name
+
+
+def _export_dir_for_scene(scene_name):
+    return os.path.join(bpy.path.abspath("//"), f"export_{scene_name}")
+
+
+def clear_export_dir(export_dir):
+    """Delete the export directory so stale artifacts from a previous run can
+    never make a later validation appear to pass."""
+    if os.path.isdir(export_dir):
+        shutil.rmtree(export_dir)
+        print(f"  [OK] Cleared stale export directory: {export_dir}")
+    else:
+        print(f"  [OK] No stale export directory to clear: {export_dir}")
+
+
+def _find_fbx2json():
+    """Locate Blender's bundled fbx2json.py (the FBX exporter's own parser)."""
+    ver = f"{bpy.app.version[0]}.{bpy.app.version[1]}"
+    bindir = os.path.dirname(os.path.abspath(bpy.app.binary_path))
+    candidates = [
+        # Linux / Windows layout: <blender dir>/<ver>/scripts/...
+        os.path.join(bindir, ver, "scripts", "addons_core", "io_scene_fbx", "fbx2json.py"),
+        # macOS layout: <Blender.app>/Contents/Resources/<ver>/scripts/...
+        os.path.join(os.path.dirname(bindir), "Resources", ver, "scripts",
+                     "addons_core", "io_scene_fbx", "fbx2json.py"),
+    ]
+    for candidate in candidates:
+        if os.path.isfile(candidate):
+            return candidate
+    raise FileNotFoundError(f"fbx2json.py not found; tried: {candidates}")
+
+
+def _parse_fbx(fbx_path):
+    """Parse an FBX file with Blender's bundled fbx2json parser.
+
+    The fbx2json CLI mis-parses argv when Blender is launched with --python,
+    so the module is loaded via importlib and parse() is called directly.
+
+    Returns (ids: Counter of element ids, deformers: list of Deformer elems).
+    """
+    import importlib.util
+    from collections import Counter
+
+    spec = importlib.util.spec_from_file_location("rhvt_fbx2json", _find_fbx2json())
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    root, _version = mod.parse(fbx_path, use_namedtuple=True)
+
+    ids = Counter()
+    deformers = []
+
+    def _elem_id(elem):
+        eid = elem.id
+        if isinstance(eid, bytes):
+            eid = eid.decode("utf-8", "replace")
+        return eid
+
+    def walk(elem):
+        eid = _elem_id(elem)
+        ids[eid] += 1
+        if eid == "Deformer":
+            deformers.append(elem)
+        for sub in elem.elems:
+            walk(sub)
+
+    for top in root.elems:
+        walk(top)
+
+    return ids, deformers
+
+
+def _analyze_fbx_skin(fbx_path):
+    """Analyze the skin structure of an exported skeletal FBX.
+
+    Returns a dict with counts of: deformers (skin + clusters), skins
+    (Deformers with a 'Link_DeformAcuracy'/'Deformations' child),
+    weighted_clusters (Deformers carrying 'Weights' + 'Indexes' children),
+    poses, matrices, geometries and materials.
+    """
+    ids, deformers = _parse_fbx(fbx_path)
+
+    def child_ids(elem):
+        out = []
+        for sub in elem.elems:
+            sid = sub.id
+            if isinstance(sid, bytes):
+                sid = sid.decode("utf-8", "replace")
+            out.append(sid)
+        return out
+
+    skins = 0
+    weighted = 0
+    for d in deformers:
+        kids = child_ids(d)
+        # A skin Deformer carries the FBX 'Link_DeformAcuracy' property
+        # (deformation accuracy); clusters do not. 'Deformations' is kept as
+        # a fallback for other FBX versions/layouts.
+        if "Link_DeformAcuracy" in kids or "Deformations" in kids:
+            skins += 1
+        if "Weights" in kids and "Indexes" in kids:
+            weighted += 1
+
+    return {
+        "deformers": ids.get("Deformer", 0),
+        "skins": skins,
+        "weighted_clusters": weighted,
+        "poses": ids.get("Pose", 0),
+        "matrices": ids.get("Matrix", 0),
+        "geometries": ids.get("Geometry", 0),
+        "materials": ids.get("Material", 0),
+    }
+
+
+def validate_skeletal_fbx(fbx_path):
+    """Validate that an exported skeletal FBX contains a real skin.
+
+    Catches the 1.6.2 regression where the FBX contained no Deformer/Skin/
+    Cluster/Pose elements at all (unbound mesh -> invalid skeleton in
+    Unreal). Returns (passed: bool, stats: dict).
+    """
+    print(f"  [CHECK] FBX skin: {os.path.basename(fbx_path)}")
+    stats = _analyze_fbx_skin(fbx_path)
+    print(f"          Deformer={stats['deformers']} skins={stats['skins']} "
+          f"weighted_clusters={stats['weighted_clusters']} Pose={stats['poses']} "
+          f"Matrix={stats['matrices']} Geometry={stats['geometries']}")
+
+    failures = []
+    if stats["deformers"] < 1:
+        failures.append("no Deformer elements (mesh is not bound to the armature)")
+    if stats["skins"] < 1:
+        failures.append("no skin Deformer")
+    if stats["weighted_clusters"] < 1:
+        failures.append("no weighted vertex clusters (no vertex groups exported)")
+    if stats["poses"] < 1:
+        failures.append("no Pose element (armature rest pose missing)")
+    if stats["matrices"] < 1:
+        failures.append("no Matrix elements")
+    if stats["geometries"] < 1:
+        failures.append("no Geometry elements (empty mesh?)")
+
+    if failures:
+        for failure in failures:
+            print(f"  [FAIL] {failure}")
+        return False, stats
+
+    print("  [OK] Valid skin structure")
+    return True, stats
+
+
+_PREDICTABLE_NAME_RE = re.compile(r"^[A-Za-z0-9_]+$")
+
+
+def _split_manifest_entry(entry):
+    """Split an 'object_name:data_name' manifest entry into (left, right).
+
+    Returns None if the entry is malformed.
+    """
+    if not isinstance(entry, str) or ":" not in entry:
+        return None
+    left, _, right = entry.partition(":")
+    return left, right
+
+
+def _check_manifest_names(entries, expected, label):
+    """Validate the right-hand side of 'object:data' manifest entries.
+
+    The right side is the name Unreal imports the mesh under; it must be the
+    predictable name - no '.NNN' suffixes, no '_copy'. (The left side is the
+    Blender object name and may legitimately differ, e.g. 'SM_wheel_0_L.001'.)
+    Catches the 1.6.2 mesh-naming regression. Returns a list of failure
+    strings (empty list = pass).
+    """
+    failures = []
+    seen = set()
+    for entry in entries:
+        parts = _split_manifest_entry(entry)
+        if parts is None:
+            failures.append(f"{label}: malformed entry {entry!r} (expected 'object:data')")
+            continue
+        left, right = parts
+        seen.add(right)
+        if not _PREDICTABLE_NAME_RE.match(right):
+            failures.append(f"{label}: data name {right!r} is not a predictable name "
+                            f"(no '.NNN' or '_copy' suffixes allowed) in entry {entry!r}")
+        if right not in expected:
+            failures.append(f"{label}: unexpected data name {right!r} in entry {entry!r} "
+                            f"(expected one of {sorted(expected)})")
+        if left != right:
+            print(f"  [WARN] {label}: object name differs from data name in entry {entry!r} "
+                  f"(object names may carry suffixes, data names may not)")
+
+    missing = expected - seen
+    if missing:
+        failures.append(f"{label}: missing expected names {sorted(missing)}")
+
+    return failures
+
+
+def validate_export_manifest(json_path, export_dir, axle_count):
+    """Validate the export JSON manifest.
+
+    Catches the 1.6.2 regression where mesh data names on the right-hand
+    side of 'object:data' entries contained '.001'/'_copy' suffixes, and
+    verifies that every file referenced by the manifest exists in the export
+    directory. Returns (passed: bool, manifest: dict).
+    """
+    print(f"  [CHECK] Export manifest: {os.path.basename(json_path)}")
+    with open(json_path) as f:
+        manifest = json.load(f)
+
+    expected_static = {"SM_body"} | {f"SM_wheel_{i}_{s}" for i in range(axle_count) for s in ("L", "R")}
+    expected_skeletal = {"SK_phys_mesh", "SK_proxy"}
+
+    failures = []
+    failures += _check_manifest_names(manifest.get("static_mesh_names", []),
+                                      expected_static, "static_mesh_names")
+    failures += _check_manifest_names(manifest.get("skeletal_mesh_names", []),
+                                      expected_skeletal, "skeletal_mesh_names")
+
+    # Wheel entries: wheel_filename must point at the predictable wheel name
+    wheels = manifest.get("wheels", {})
+    expected_wheel_keys = {f"wheel_{i}_{s}" for i in range(axle_count) for s in ("L", "R")}
+    if set(wheels.keys()) != expected_wheel_keys:
+        failures.append(f"wheels: expected keys {sorted(expected_wheel_keys)}, got {sorted(wheels.keys())}")
+    for wheel_key, wheel in wheels.items():
+        wheel_filename = wheel.get("wheel_filename")
+        if wheel_filename is None:
+            failures.append(f"wheels.{wheel_key}: missing wheel_filename")
+            continue
+        parts = _split_manifest_entry(wheel_filename)
+        if parts is None:
+            failures.append(f"wheels.{wheel_key}: malformed wheel_filename {wheel_filename!r}")
+            continue
+        _left, right = parts
+        if not _PREDICTABLE_NAME_RE.match(right):
+            failures.append(f"wheels.{wheel_key}: wheel_filename data name {right!r} "
+                            f"is not a predictable name")
+        if right != f"SM_{wheel_key}":
+            failures.append(f"wheels.{wheel_key}: wheel_filename data name {right!r} "
+                            f"!= expected 'SM_{wheel_key}'")
+
+        caliper_filename = wheel.get("brake_caliper_filename")
+        if caliper_filename is not None:
+            caliper_parts = _split_manifest_entry(caliper_filename)
+            if caliper_parts is None:
+                failures.append(f"wheels.{wheel_key}: malformed brake_caliper_filename {caliper_filename!r}")
+            elif not _PREDICTABLE_NAME_RE.match(caliper_parts[1]):
+                failures.append(f"wheels.{wheel_key}: brake_caliper_filename data name "
+                                f"{caliper_parts[1]!r} is not a predictable name")
+
+    # Every file referenced by the manifest must exist in the export directory
+    for key in ("skel_phys_mesh", "skel_proxy_mesh"):
+        filename = manifest.get(key)
+        if not filename:
+            failures.append(f"{key}: missing from manifest")
+        elif not os.path.isfile(os.path.join(export_dir, filename)):
+            failures.append(f"{key}: file {filename!r} not found in export directory")
+    for filename in manifest.get("skeletal_mesh_files", []) + manifest.get("static_mesh_files", []):
+        if not os.path.isfile(os.path.join(export_dir, filename)):
+            failures.append(f"manifest references {filename!r} but it is missing from the export directory")
+
+    if failures:
+        for failure in failures:
+            print(f"  [FAIL] {failure}")
+        return False, manifest
+
+    entry_count = len(manifest.get("static_mesh_names", [])) + len(manifest.get("skeletal_mesh_names", []))
+    print(f"  [OK] Manifest names are clean ({entry_count} mesh entries); all referenced files exist")
+    return True, manifest
+
+
+def validate_export(export_dir, scene_name, axle_count):
+    """Run the full set of export regression checks against a fresh export.
+
+    1. The export directory exists and is non-empty (the export actually
+       produced files - the directory is cleared before each export)
+    2. Both skeletal FBX files contain a valid skin (Deformer/Skin/Cluster
+       with weights + Pose) - the 1.6.2 invalid-skeleton regression
+    3. The JSON manifest lists only predictable mesh data names
+       (no '.001'/'_copy') and references files that exist - the 1.6.2
+       mesh-naming regression
+    4. The static FBX contains the test scene's materials
+
+    Returns True only if every check passes.
+    """
+    print(f"\n  --- Export validation: {export_dir} ---")
+    if not os.path.isdir(export_dir):
+        print(f"  [FAIL] Export directory not found: {export_dir}")
+        return False
+    files = sorted(os.listdir(export_dir))
+    print(f"  [OK] Export directory contents: {files}")
+    if not files:
+        print("  [FAIL] Export directory is empty (export produced no files)")
+        return False
+
+    passed = True
+
+    # 1. Skeletal FBX skin validation
+    skel_fbxs = [os.path.join(export_dir, f) for f in files
+                 if f.endswith(".fbx") and (f.startswith("SK_phys") or f.startswith("SK_proxy"))]
+    if len(skel_fbxs) < 2:
+        print(f"  [FAIL] Expected 2 skeletal FBX files (SK_phys*, SK_proxy*), "
+              f"found: {[os.path.basename(f) for f in skel_fbxs]}")
+        passed = False
+    for fbx in skel_fbxs:
+        ok, _stats = validate_skeletal_fbx(fbx)
+        passed = passed and ok
+
+    # 2. Manifest validation
+    json_files = [f for f in files if f.endswith(".json")]
+    if not json_files:
+        print("  [FAIL] No JSON manifest found in export directory")
+        passed = False
+    else:
+        ok, _manifest = validate_export_manifest(os.path.join(export_dir, json_files[0]),
+                                                 export_dir, axle_count)
+        passed = passed and ok
+
+    # 3. Materials in the static FBX (the test scene assigns a material to
+    #    every mesh, so the export must carry them through)
+    static_fbxs = [os.path.join(export_dir, f) for f in files if f.endswith("_static.fbx")]
+    if not static_fbxs:
+        print("  [FAIL] No static FBX file found (expected '*_static.fbx')")
+        passed = False
+    else:
+        ids, _deformers = _parse_fbx(static_fbxs[0])
+        mat_count = ids.get("Material", 0)
+        if mat_count < 1:
+            print(f"  [FAIL] Static FBX {os.path.basename(static_fbxs[0])} contains no materials "
+                  f"(the test scene assigns one to every mesh)")
+            passed = False
+        else:
+            print(f"  [OK] Static FBX contains {mat_count} material(s)")
+
+    return passed
+
+
+def _run_export_pipeline(context, args):
+    """Build the full scene state, clear the export directory, and run the
+    export operator. Returns (export_dir, scene_name)."""
+    prepare_scene_for(context, "rigged", args)
+    scene_name = _scene_name()
+    export_dir = _export_dir_for_scene(scene_name)
+    clear_export_dir(export_dir)
+    bpy.ops.rushhourvp.export_ue_vehicle_fbx()
+    return export_dir, scene_name
+
+
+def test_skeleton_export(context, args):
+    """Regression test (1.6.2 invalid skeleton): the exported skeletal FBXs
+    must contain a valid skin (Deformer/Skin/Cluster with weights + Pose)."""
+    export_dir, _scene_name = _run_export_pipeline(context, args)
+    files = sorted(os.listdir(export_dir)) if os.path.isdir(export_dir) else []
+    skel_fbxs = [os.path.join(export_dir, f) for f in files
+                 if f.endswith(".fbx") and (f.startswith("SK_phys") or f.startswith("SK_proxy"))]
+    if len(skel_fbxs) < 2:
+        print(f"  [FAIL] Expected 2 skeletal FBX files (SK_phys*, SK_proxy*), "
+              f"found: {[os.path.basename(f) for f in skel_fbxs]}")
+        return False
+    passed = True
+    for fbx in skel_fbxs:
+        ok, _stats = validate_skeletal_fbx(fbx)
+        passed = passed and ok
+    return passed
+
+
+def test_manifest_export(context, args):
+    """Regression test (1.6.2 mesh naming): the export JSON manifest must
+    list only predictable mesh data names (no '.001'/'_copy') and reference
+    files that exist."""
+    export_dir, _scene_name = _run_export_pipeline(context, args)
+    files = sorted(os.listdir(export_dir)) if os.path.isdir(export_dir) else []
+    json_files = [f for f in files if f.endswith(".json")]
+    if not json_files:
+        print("  [FAIL] No JSON manifest found in export directory")
+        return False
+    ok, _manifest = validate_export_manifest(os.path.join(export_dir, json_files[0]),
+                                             export_dir, args.axle_count)
+    return ok
+
+
+def test_export_validation(context, args):
+    """Regression suite: full pipeline + all export validations (skeleton,
+    manifest, materials)."""
+    export_dir, scene_name = _run_export_pipeline(context, args)
+    return validate_export(export_dir, scene_name, args.axle_count)
+
+
 def test_export_vehicle(context, args):
-    """Test: export_ue_vehicle_fbx operator."""
+    """Test: export_ue_vehicle_fbx operator (+ deep regression validation)."""
     prepare_scene_for(context, "rigged", args)
 
-    scene_name = os.path.splitext(os.path.basename(bpy.data.filepath))[0] if bpy.data.filepath else "test"
+    scene_name = _scene_name()
+    export_dir = _export_dir_for_scene(scene_name)
+
+    # Clear any stale export so a previously successful run can't mask a failure
+    clear_export_dir(export_dir)
 
     bpy.ops.rushhourvp.export_ue_vehicle_fbx()
 
-    export_dir = os.path.join(bpy.path.abspath("//"), f"export_{scene_name}")
     if os.path.isdir(export_dir):
         files = os.listdir(export_dir)
         print(f"  [OK] Export directory: {export_dir}")
@@ -548,7 +1013,11 @@ def test_export_vehicle(context, args):
         fbx_count = len([f for f in files if f.endswith('.fbx')])
         json_count = len([f for f in files if f.endswith('.json')])
         print(f"  [OK] FBX files: {fbx_count}, JSON files: {json_count}")
-        return fbx_count >= 2 and json_count >= 1
+        if fbx_count < 2 or json_count < 1:
+            print(f"  [FAIL] Expected at least 2 FBX and 1 JSON file")
+            return False
+        # Deep regression validation: skin structure, manifest naming, materials
+        return validate_export(export_dir, scene_name, args.axle_count)
     else:
         print(f"  [FAIL] Export directory not found: {export_dir}")
         return False
@@ -602,7 +1071,8 @@ def _export_simple(context, args):
 
 
 def test_full_pipeline(context, args):
-    """Test: run the full 'Simple' panel workflow (Prepare Scene -> Add To Collections -> Export Simple)."""
+    """Test: run the full 'Simple' panel workflow (Prepare Scene -> Add To Collections -> Export Simple),
+    then validate the exported assets (skin, manifest names, materials)."""
     results = {}
 
     results["scene_prep"] = run_test("Prepare Scene (simple)",
@@ -611,8 +1081,16 @@ def test_full_pipeline(context, args):
     results["sorting"] = run_test("Add To Vehicle Collections",
                                    lambda: test_sort_objects(context, args))
 
+    # Clear any stale export so a previously successful run can't mask a failure
+    scene_name = _scene_name()
+    clear_export_dir(_export_dir_for_scene(scene_name))
+
     results["export_simple"] = run_test("Export Vehicle - Simple",
                                          lambda: _export_simple(context, args))
+
+    results["export_validation"] = run_test("Export Validation (regression checks)",
+                                             lambda: validate_export(_export_dir_for_scene(_scene_name()),
+                                                                     _scene_name(), args.axle_count))
 
     return all(results.values())
 
@@ -681,6 +1159,11 @@ Examples:
   blender -b --python test_runner.py -- --test-rig
   blender -b --python test_runner.py -- --test-export
 
+  # Regression tests (invalid skeleton / unpredictable mesh names)
+  blender -b --python test_runner.py -- --test-skeleton
+  blender -b --python test_runner.py -- --test-manifest
+  blender -b --python test_runner.py -- --test-export-validation
+
   # With an existing blend file
   blender -b --python test_runner.py -- --file scene.blend --full-pipeline
         """
@@ -698,11 +1181,20 @@ Examples:
     parser.add_argument("--test-sorting", action="store_true", help="Test object sorting into collections")
     parser.add_argument("--test-prep", action="store_true", help="Test vehicle prep operator")
     parser.add_argument("--test-rig", action="store_true", help="Test rig vehicle operator")
-    parser.add_argument("--test-export", action="store_true", help="Test export operator")
+    parser.add_argument("--test-export", action="store_true", help="Test export operator (includes deep regression validation)")
     parser.add_argument("--test-check", action="store_true", help="Test vehicle check operator")
     parser.add_argument("--test-center", action="store_true", help="Test center vehicle operator")
     parser.add_argument("--test-bounds", action="store_true", help="Test show bounds operator")
     parser.add_argument("--test-operator", help="Test a specific operator by bl_idname")
+
+    # Regression tests (guard against the 1.6.2 invalid-skeleton and
+    # unpredictable-mesh-name regressions)
+    parser.add_argument("--test-skeleton", action="store_true",
+                        help="Regression test: exported skeletal FBXs contain a valid skin (Deformer/Skin/Cluster/Pose)")
+    parser.add_argument("--test-manifest", action="store_true",
+                        help="Regression test: export JSON manifest has predictable mesh names (no '.001'/'_copy')")
+    parser.add_argument("--test-export-validation", action="store_true",
+                        help="Regression suite: full pipeline + skeleton, manifest and material checks")
 
     # Test data options
     parser.add_argument("--body-meshes", help="Comma-separated list of mesh names to add to body collection (for external blend files)")
@@ -758,6 +1250,12 @@ Examples:
         test_mode = "rig"
     elif args.test_export:
         test_mode = "export"
+    elif args.test_skeleton:
+        test_mode = "skeleton"
+    elif args.test_manifest:
+        test_mode = "manifest"
+    elif args.test_export_validation:
+        test_mode = "export_validation"
     elif args.test_check:
         test_mode = "check"
     elif args.test_center:
@@ -776,7 +1274,10 @@ Examples:
         print("  --test-sorting     Test add_selected_to_vehicle_collection operator")
         print("  --test-prep        Test prep_vehicle_for_unreal operator")
         print("  --test-rig         Test rig_vehicle operator")
-        print("  --test-export      Test export_ue_vehicle_fbx operator")
+        print("  --test-export      Test export_ue_vehicle_fbx operator (includes deep regression validation)")
+        print("  --test-skeleton    Regression test: exported skeletal FBXs contain a valid skin")
+        print("  --test-manifest    Regression test: export JSON manifest has predictable mesh names")
+        print("  --test-export-validation  Regression suite: full pipeline + skeleton/manifest/material checks")
         print("  --test-check       Test check_vehicle operator")
         print("  --test-center      Test center_vehicle operator")
         print("  --test-bounds      Test show_object_bounds operator")
@@ -795,6 +1296,9 @@ Examples:
         "prep": lambda: test_prep_vehicle(bpy.context, args),
         "rig": lambda: test_rig_vehicle(bpy.context, args),
         "export": lambda: test_export_vehicle(bpy.context, args),
+        "skeleton": lambda: test_skeleton_export(bpy.context, args),
+        "manifest": lambda: test_manifest_export(bpy.context, args),
+        "export_validation": lambda: test_export_validation(bpy.context, args),
         "full_pipeline": lambda: test_full_pipeline(bpy.context, args),
         "check": lambda: test_check_vehicle(bpy.context, args),
         "center": lambda: test_center_vehicle(bpy.context, args),

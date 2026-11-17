@@ -149,7 +149,10 @@ you can isolate a specific step. Replace `--full-pipeline` with one of these:
 | `--test-sorting`     | `add_selected_to_vehicle_collection` |
 | `--test-prep`        | `prep_vehicle_for_unreal` |
 | `--test-rig`         | `rig_vehicle` |
-| `--test-export`      | `export_ue_vehicle_fbx` |
+| `--test-export`      | `export_ue_vehicle_fbx` (includes deep regression validation) |
+| `--test-skeleton`    | Regression: exported skeletal FBXs contain a valid skin |
+| `--test-manifest`    | Regression: export JSON manifest has predictable mesh names |
+| `--test-export-validation` | Regression suite: full pipeline + skin/manifest/material checks |
 | `--test-check`       | `check_vehicle` |
 | `--test-center`      | `center_vehicle` |
 | `--test-bounds`      | `show_object_bounds` |
@@ -174,7 +177,8 @@ Combine multiple tests in one invocation:
 
 | Option | Description |
 |--------|-------------|
-| `--full-pipeline` | Run the full Simple workflow (prep scene → sort → simple export) |
+| `--full-pipeline` | Run the full Simple workflow (prep scene → sort → simple export), then validate the exported assets |
+| `--test-export-validation` | Regression suite: full pipeline + skin/manifest/material checks (see section 7) |
 | `--axle-count N` | Number of axles for the synthetic scene (default: 2) |
 | `--file scene.blend` | Test an existing saved `.blend` instead of the generated one |
 | `--body-meshes a,b,c` | Body mesh names to sort (only for `--file`) |
@@ -208,7 +212,69 @@ output directory from the saved blend file's location, so both land side by side
 
 ---
 
-## 7. Interpreting results
+## 7. Regression tests
+
+The 1.6.2 release shipped with two regressions that only became apparent after
+importing into Unreal:
+
+1. **Invalid skeleton** — the exported skeletal FBX contained no skin at all
+   (no `Deformer`/`Skin`/`Cluster`/`Pose` elements), so the mesh was not bound
+   to the armature and Unreal rejected the skeleton.
+2. **Unpredictable mesh names** — the export JSON manifest listed mesh data
+   names with `.001`/`_copy` suffixes on the right-hand side of the
+   `object:data` entries (e.g. `SM_wheel_0_L.001:SM_wheel_0_L.001` instead of
+   `SM_wheel_0_L.001:SM_wheel_0_L`), breaking Unreal's predictable-name
+   lookups.
+
+To keep these from recurring, the harness performs deep validation of the
+exported assets:
+
+- **Skin validation** — each exported skeletal FBX is parsed with Blender's
+  bundled `fbx2json` parser and must contain a real skin: at least one
+  `Deformer` element, at least one skin deformer (carrying
+  `Link_DeformAcuracy`), at least one weighted vertex cluster
+  (`Weights` + `Indexes`), at least one `Pose`, at least one `Matrix` and at
+  least one `Geometry`.
+- **Manifest validation** — the right-hand side of every `object:data` entry
+  in the export JSON (the mesh data name Unreal imports) must be a
+  predictable name — `SM_body`, `SM_wheel_<axle>_<L|R>`, `SK_phys_mesh`,
+  `SK_proxy` — with no `.NNN` or `_copy` suffixes. The left-hand side (the
+  Blender object name) may legitimately differ, e.g. `SM_wheel_0_L.001`. The
+  wheel `wheel_filename` entries are checked the same way, and every file
+  referenced by the manifest must exist in the export directory.
+- **Material check** — the synthetic test scene assigns a material to every
+  mesh, and the test asserts the exported static FBX actually carries them
+  (a regression that silently drops materials would be caught).
+
+The export folder is **deleted before every export** (the export operator does
+not clean up after itself), so a previous successful run can never make a
+broken run appear valid.
+
+| Flag | What it does |
+|------|--------------|
+| `--test-skeleton` | Full pipeline + skin validation only |
+| `--test-manifest` | Full pipeline + manifest validation only |
+| `--test-export-validation` | Full pipeline + all checks (skin, manifest, materials) |
+
+The same validation is built into `--full-pipeline` and `--test-export`, so
+the per-version runs in section 2 double as a regression gate: a release that
+reintroduces either bug fails those runs with `[FAIL]` lines naming the exact
+problem.
+
+Quick regression check across the supported versions:
+
+```bash
+SCRIPT="$REPO/test_runner.py"
+
+"$BLENDER_BUILDS/blender-4.5.1-macos-arm64+lts.b0a72b245dcf/Blender/Blender.app/Contents/MacOS/Blender" \
+  -b --python "$SCRIPT" -- --test-export-validation
+"$BLENDER_BUILDS/blender-5.2.2-macos-arm64+stable.d13f752e3b9c/Blender/Blender.app/Contents/MacOS/Blender" \
+  -b --python "$SCRIPT" -- --test-export-validation
+```
+
+---
+
+## 8. Interpreting results
 
 - The run ends with `ALL TESTS PASSED` (exit code `0`) or `SOME TESTS FAILED`
   (exit code `1`).
@@ -217,3 +283,7 @@ output directory from the saved blend file's location, so both land side by side
 - After a successful `--full-pipeline`, confirm the exported files exist on disk:
   `ls test_scenes/<major.minor>/export_test_self_contained/` should list 3 `.fbx`
   files and 1 `.json`.
+- The export validation prints a one-line summary per skeletal FBX, e.g.
+  `Deformer=10 skins=1 weighted_clusters=5 Pose=1 Matrix=11 Geometry=1`.
+  A broken (1.6.2-style) export shows `Deformer=0 ... Pose=0` and fails with
+  `no Deformer elements (mesh is not bound to the armature)`.
