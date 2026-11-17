@@ -147,7 +147,7 @@ you can isolate a specific step. Replace `--full-pipeline` with one of these:
 | `--test-scene-prep`  | `prepare_scene_simple` |
 | `--test-collections` | `create_vehicle_collections` |
 | `--test-sorting`     | `add_selected_to_vehicle_collection` |
-| `--test-prep`        | `prep_vehicle_for_unreal` |
+| `--test-prep`        | `prep_vehicle_for_unreal` (also asserts a blank material slot is removed — see section 7) |
 | `--test-rig`         | `rig_vehicle` |
 | `--test-export`      | `export_ue_vehicle_fbx` (includes deep regression validation) |
 | `--test-skeleton`    | Regression: exported skeletal FBXs contain a valid skin |
@@ -225,6 +225,13 @@ importing into Unreal:
    `object:data` entries (e.g. `SM_wheel_0_L.001:SM_wheel_0_L.001` instead of
    `SM_wheel_0_L.001:SM_wheel_0_L`), breaking Unreal's predictable-name
    lookups.
+3. **Prep crash on a blank material slot (Blender 5.2)** — the prep stage's
+   `remove_blank_materials` called `material_slot_remove()` without making the
+   target object active, so the operator's `poll()` failed with
+   `context is incorrect`. A blank slot is produced when a mesh has a Boolean
+   modifier whose cutter carries no material: applying the modifier during prep
+   leaves a trailing empty slot. Cars without such a boolean never hit it, which
+   is why it only surfaced on one specific vehicle.
 
 To keep these from recurring, the harness performs deep validation of the
 exported assets:
@@ -245,6 +252,14 @@ exported assets:
 - **Material check** — the synthetic test scene assigns a material to every
   mesh, and the test asserts the exported static FBX actually carries them
   (a regression that silently drops materials would be caught).
+- **Blank material slot check** — the synthetic test scene adds a blank
+  (material-less) slot to `body_chassis`, reproducing the slot a material-less
+  Boolean cutter leaves behind. `--test-prep` asserts that prep removes it and
+  that no blank slot remains in the `prepped` collection. Because the slot is in
+  the shared test scene, every pipeline run (`--full-pipeline`,
+  `--test-export-validation`, …) also exercises the removal; the exported static
+  FBX still carries exactly the real materials, confirming the blank slot was
+  stripped rather than exported.
 
 The export folder is **deleted before every export** (the export operator does
 not clean up after itself), so a previous successful run can never make a
@@ -259,7 +274,8 @@ broken run appear valid.
 The same validation is built into `--full-pipeline` and `--test-export`, so
 the per-version runs in section 2 double as a regression gate: a release that
 reintroduces either bug fails those runs with `[FAIL]` lines naming the exact
-problem.
+problem. The blank-material-slot regression (item 3) is gated by `--test-prep`
+and, transitively, by every pipeline run above.
 
 Quick regression check across the supported versions:
 

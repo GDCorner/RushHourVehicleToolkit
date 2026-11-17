@@ -151,6 +151,9 @@ cython_debug/
 # Ignore blender backup saves
 *.blend1
 
+# User-provided repro scene for the 5.2 prep crash (do not commit)
+Sedan_WM_Test_Tagging.blend
+
 # Ignore FBX files
 *.fbx
 

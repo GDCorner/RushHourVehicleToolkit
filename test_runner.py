@@ -242,6 +242,14 @@ def create_test_scene(axle_count=2):
         object_defs.append(name)
         print(f"  Created {name} at {part.location} scale {part.scale}")
 
+    # Regression trigger (prep crash on Blender 5.2): a blank material slot on a
+    # body mesh. Real-world cause: a Boolean modifier whose cutter has no material
+    # leaves a trailing blank slot when the modifier is applied during prep. Prep's
+    # remove_blank_materials must strip it without crashing. The slot is removed
+    # during prep, so it does not change the exported material count.
+    bpy.data.objects["body_chassis"].data.materials.append(None)
+    print("  Added a blank material slot to body_chassis (regression trigger)")
+
     # Create wheel assemblies for each axle
     wheel_positions = []
     wheel_length = 2.4  # Distance between front and rear axles
@@ -531,6 +539,20 @@ def test_prep_vehicle(context, args):
     if prepped_wheels:
         wheel_meshes = [obj for obj in prepped_wheels.objects if obj.name.startswith("wheel_")]
         checks.append((f"wheel meshes in prepped_wheels ({len(wheel_meshes)})", lambda: len(wheel_meshes) > 0))
+
+    # Regression check (prep crash on Blender 5.2): the test scene carries a blank
+    # material slot on body_chassis. remove_blank_materials must remove it without
+    # crashing on the operator context. (On broken code the prep operator above
+    # raises before we get here, so the test fails either way.)
+    blank_slots = []
+    if prepped:
+        for obj in prepped.all_objects:
+            if obj.type == 'MESH':
+                for slot in obj.material_slots:
+                    if slot.material is None:
+                        blank_slots.append(obj.name)
+    checks.append(("no blank material slots remain in prepped (regression)",
+                   lambda: len(blank_slots) == 0))
 
     passed = sum(1 for _, check in checks if check())
     for name, check in checks:
