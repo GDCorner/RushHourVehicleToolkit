@@ -11,12 +11,11 @@ results. No external `.blend` files are required.
 
 ## Supported Blender LTS versions
 
-`rhvtinfo.py` declares `SUPPORTED_BLENDER_VERSIONS = [(4, 2, 0), (4, 5, 0), (5, 2, 0)]`.
-The `blender_manifest.toml` declares `blender_version_min = "4.2.0"`.
+`rhvtinfo.py` declares `SUPPORTED_BLENDER_VERSIONS = [(4, 5, 0), (5, 2, 0)]`.
+The `blender_manifest.toml` declares `blender_version_min = "4.5.0"`.
 
 | Version | Test build | Output folder |
 |---------|------------|---------------|
-| 4.2.x   | 4.2.12     | `test_scenes/4.2/` |
 | 4.5.x   | 4.5.1      | `test_scenes/4.5/` |
 | 5.2.x   | 5.2.2      | `test_scenes/5.2/` |
 

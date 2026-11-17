@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 ADDON_VERSION = (1, 6, 2)
 
 SUPPORTED_BLENDER_VERSIONS = [
-    (4, 2, 0),
     (4, 5, 0),
     (5, 2, 0),
 ]
@@ -58,8 +57,8 @@ def test_blender_versions_check():
         (3, 6, 12): False,
         (4, 0, 0): False,
         (4, 1, 0): False,
-        (4, 2, 0): True,
-        (4, 2, 19): True,
+        (4, 2, 0): False,
+        (4, 2, 19): False,
         (4, 3, 0): False,
         (4, 4, 0): False,
         (4, 5, 0): True,
