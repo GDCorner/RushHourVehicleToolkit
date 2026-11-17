@@ -293,8 +293,13 @@ def rig_vehicle(context, decimate_proxy_mesh: bool = True, decimate_amount: floa
 
     # Set the armature to the active object
     context.view_layer.objects.active = armature_obj
-    # Parent the meshes to the armature
-    bpy.ops.object.parent_set(type='OBJECT')
+    # Parent the meshes to the armature.
+    # ARMATURE_NAME (not OBJECT) is required: it adds the Armature modifier that the
+    # FBX exporter needs to emit a Skin/Clusters, and it pre-creates a (empty) vertex
+    # group per deform bone which assign_mesh_to_vertex_group then fills with weights.
+    # Plain OBJECT parenting adds no modifier, so the exported FBX has no skin and
+    # Unreal imports an invalid skeleton.
+    bpy.ops.object.parent_set(type='ARMATURE_NAME')
 
     # Deselect everything
     bpy.ops.object.select_all(action='DESELECT')
