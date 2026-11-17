@@ -290,24 +290,37 @@ def remove_blank_materials(objects):
     # Blank material slots on meshes causes issues when importing an FBX into unreal, causing all kinds of material reassignment chaos
     use_selected_slot_method = False
     if bpy.app.version[0] >= 4 and bpy.app.version[1] >= 2:
-        # The API changed in Blender 4.2 to not take an object, rather just operates on the selected object
+        # The API changed in Blender 4.2 to not take an object, rather just operates on the active object
         use_selected_slot_method = True
-        for obj in objects:
-            obj.select_set(False)
 
     bpy.ops.object.select_all(action='DESELECT')
     for obj in objects:
-        for slot in obj.material_slots:
-            if slot.material is None:
-                message_helpers.show_warning_message(
-                    message="Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal",
-                    title="Blank Material Slot Detected")
-                log.warning("Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal")
-                obj.active_material_index = obj.material_slots.find(slot.name)
-                if use_selected_slot_method:
-                    bpy.ops.object.material_slot_remove()
-                else:
-                    bpy.ops.object.material_slot_remove({'object': obj})
+        if obj.type != 'MESH':
+            continue
+        # Collect the blank slot indices up front: removing a slot shifts the
+        # indices of the slots after it, so iterating the live collection while
+        # removing would skip slots.
+        blank_slot_indices = [index for index, slot in enumerate(obj.material_slots) if slot.material is None]
+        if not blank_slot_indices:
+            continue
+        for _ in blank_slot_indices:
+            message_helpers.show_warning_message(
+                message="Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal",
+                title="Blank Material Slot Detected")
+            log.warning("Blank material slot on object: " + obj.name + ". Blank material slots can cause material assignment issues in Unreal")
+        if use_selected_slot_method:
+            # material_slot_remove() operates on the active object, so the object
+            # must be selected (which also makes it active) in the view layer,
+            # otherwise its poll() fails with "context is incorrect"
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
+        # Remove from the highest index down so the lower indices stay valid
+        for index in sorted(blank_slot_indices, reverse=True):
+            obj.active_material_index = index
+            if use_selected_slot_method:
+                bpy.ops.object.material_slot_remove()
+            else:
+                bpy.ops.object.material_slot_remove({'object': obj})
 
 
 def get_bounds_of_meshes(meshes):
