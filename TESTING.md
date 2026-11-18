@@ -54,7 +54,7 @@ To install into all three supported versions at once:
 
 ```bash
 base="$HOME/Library/Application Support/Blender"
-for v in 4.2 4.5 5.2; do
+for v in 4.5 5.2; do
   DEST="$base/$v/scripts/addons/RushHourVehicleToolkit"
   mkdir -p "$DEST"
   rsync -a --delete \
@@ -84,12 +84,6 @@ The full pipeline runs the "Simple" panel workflow end to end:
 **Prepare Scene → Add To Vehicle Collections → Export Vehicle (Simple)**.
 The Simple export internally runs Prep + Rig + Export + Check.
 
-> **Blender 4.2**
-```bash
-"$BLENDER_BUILDS/blender-4.2.12-macos-arm64+lts.cf1451225401/Blender/Blender.app/Contents/MacOS/Blender" \
-  -b --python "$REPO/test_runner.py" -- --full-pipeline
-```
-
 > **Blender 4.5**
 ```bash
 "$BLENDER_BUILDS/blender-4.5.1-macos-arm64+lts.b0a72b245dcf/Blender/Blender.app/Contents/MacOS/Blender" \
@@ -107,7 +101,6 @@ Run all three in sequence:
 ```bash
 SCRIPT="$REPO/test_runner.py"
 
-"$BLENDER_BUILDS/blender-4.2.12-macos-arm64+lts.cf1451225401/Blender/Blender.app/Contents/MacOS/Blender" -b --python "$SCRIPT" -- --full-pipeline
 "$BLENDER_BUILDS/blender-4.5.1-macos-arm64+lts.b0a72b245dcf/Blender/Blender.app/Contents/MacOS/Blender" -b --python "$SCRIPT" -- --full-pipeline
 "$BLENDER_BUILDS/blender-5.2.2-macos-arm64+stable.d13f752e3b9c/Blender/Blender.app/Contents/MacOS/Blender" -b --python "$SCRIPT" -- --full-pipeline
 ```
@@ -123,7 +116,7 @@ addon directories.
 
 ```bash
 base="$HOME/Library/Application Support/Blender"
-for v in 4.2 4.5 5.2; do
+for v in 4.5 5.2; do
   DEST="$base/$v/scripts/addons/RushHourVehicleToolkit"
   if [ -d "$DEST" ]; then
     rm -rf "$DEST"
