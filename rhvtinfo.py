@@ -7,7 +7,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-ADDON_VERSION = (1, 6, 2)
+ADDON_VERSION = (1, 6, 3)
 
 SUPPORTED_BLENDER_VERSIONS = [
     (4, 5, 0),
