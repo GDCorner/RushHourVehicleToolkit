@@ -18,6 +18,7 @@ paths_exclude_pattern = [
   ".git",
   "*.zip",
   "test_scenes/",
+  "test_data/",
   "TESTING.md",
   "test_runner.py",
 ]
